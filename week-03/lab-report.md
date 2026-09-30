@@ -16,7 +16,7 @@ GitHub username: Alibyek1122
 | AI assistant (tool) | ChatGPT |
 | Exact model name and version | GPT-5.6 Sol |
 | Date of the session | 30.09.2026 |
-| Diagram renderer used | Not used yet |
+| Diagram renderer used | PlantUML Online Server |
 
 One tool and one model for all three prompts. If you switched, say why here — it changes what your
 findings mean.
@@ -198,7 +198,7 @@ Administrator --> UC5
 @enduml
 ```
 
-Rendered diagram (image, or a link):
+Rendered diagram (image, or a link): `requirements/usecase.png`
 
 ---
 
@@ -228,6 +228,7 @@ Summarise what the table in `requirements/traceability.md` shows:
 - Criteria that test **no rule** from section 1:
 
 **What does the largest gap tell you about the generated requirements?**
+The largest gap is that UC-01, UC-04, and UC-05 have user stories but no acceptance criteria. This happened because only three stories were selected for Part 3. All six use cases are covered by stories, but acceptance-criteria coverage is not equal across all use cases.
 
 ---
 
@@ -236,8 +237,22 @@ Summarise what the table in `requirements/traceability.md` shows:
 Paste the **real terminal output** of both runs. A table with nothing behind it does not count.
 
 ```
-$ python tests/check_requirements.py
-(paste)
+| | PASS | FAIL | ERROR |
+| --- | --- | --- | --- |
+| `check_requirements.py` | 23 | 0 | 0 |
+| `validate_submission.py` | 21 | 0 | 0 |
+
+Commit these numbers were produced at (`git rev-parse --short HEAD`):
+
+`b64af5f`
+
+**Every FAIL, one line each: what it is and what you decided to do about it.**
+
+None. Both final checker runs have 0 FAIL and 0 ERROR.
+
+**Did you run the checks by hand instead of with Python?**
+
+No. I ran both checks with Python.
 ```
 
 ```
@@ -268,6 +283,13 @@ Answer all three:
 2. What did the assistant get right that would have taken you noticeably longer by hand?
 3. You are handing these requirements to someone who will implement them, and you will not be in the
    room. Which single one would you rewrite first, and why?
+
+
+The most problematic part of the generated requirements was the duplication and unsupported relationships. For example, the generated US-03 described overlap prevention as a separate stakeholder goal, although it is already business rule R3. The first diagram also made UC-02 include UC-01, even though the scenario does not say that viewing availability is mandatory for every booking. Without a checker, I would catch these problems by comparing every story, criterion, and diagram relationship with the six fixed use cases, four business rules, and the out-of-scope list.
+
+The assistant was useful for producing an initial set of structured user stories, Given/When/Then criteria, and PlantUML quickly. Writing the first draft manually would have taken me longer.
+
+Before giving the requirements to an implementer, I would review US-02 first. It is the main booking story and depends on R1, R2, R3, and R4. Its duration, overlap, future-time, and blocked-room conditions must be precise because unclear booking rules could lead to incorrect implementation.
 
 Be specific. "The AI was useful" is worth nothing; "UC-06 had no story behind it until I wrote
 US-07, and the checker is what told me" is worth everything.
