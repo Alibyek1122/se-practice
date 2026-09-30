@@ -1,0 +1,40 @@
+
+
+schema: 1
+week: "03"
+
+student:
+  name: Alibyek Molshylykh
+  student_id: 24B030054
+  github: Alibyek1122
+
+assistant:
+  tool: ChatGPT
+  model: GPT-5.6 Sol
+
+counts:
+  user_stories: 6
+  acceptance_criteria_sets: 3
+
+checker:
+  pass: 23
+  fail: 0
+  error: 0
+  commit: b64af5f
+
+assumptions:
+  overlap_touching_bookings: allowed
+  exactly_two_hours: allowed
+
+traceability:
+  use_cases_not_covered: []
+  stories_not_traced: []
+
+review_findings:
+  - US-03 was merged into US-02 because overlap prevention is business rule R3 rather than a separate stakeholder goal.
+  - US-04 was rewritten so that confirmation covers both successful booking and successful cancellation.
+  - UC-02 originally included UC-01, but that relationship was removed because viewing availability is not a mandatory part of every booking.
+
+honesty:
+  can_explain_everything_submitted: yes
+  ai_usage_disclosed: yes
