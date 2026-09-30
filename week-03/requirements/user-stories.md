@@ -33,8 +33,7 @@
 
 **Priority:** Medium
 
-**Assumption:** Confirmation is limited to the booking or cancellation result and does not include SMS, push notifications, or additional reminders.
-
+**Assumption:** Confirmation is provided only after a booking or cancellation is completed successfully.
 
 ## US-05 — Block or unblock room
 
@@ -51,4 +50,4 @@
 
 **Priority:** Medium
 
-**Assumption:** Usage is based on booking information; attendance and check-in are outside the system scope.
+**Assumption:** Usage is based on booking information over a selected period.
