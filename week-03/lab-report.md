@@ -257,7 +257,35 @@ No. I ran both checks with Python.
 
 ```
 $ python tests/validate_submission.py
-(paste)
+$ python3 tests/validate_submission.py
+submission.yml — submission.yml
+------------------------------------------------------------------------
+PASS   schema                                    1
+PASS   week                                      03
+PASS   student.name                              Alibyek Molshylykh
+PASS   student.student_id                        24B030054
+PASS   student.github                            Alibyek1122
+PASS   assistant.tool                            ChatGPT
+PASS   assistant.model                           GPT-5.6 Sol
+PASS   counts.user_stories                       6
+PASS   counts.acceptance_criteria_sets           3
+PASS   checker                                   23 PASS · 0 FAIL · 0 ERROR
+NOTE   checker                                   you are claiming a clean run — it will be re-run at your commit, so make sure it is true
+PASS   checker.commit                            ec84de4
+PASS   assumptions.overlap_touching_bookings     allowed
+PASS   assumptions.exactly_two_hours             allowed
+PASS   traceability.use_cases_not_covered        []
+PASS   traceability.stories_not_traced           []
+NOTE   traceability                              you are claiming full coverage in both directions — that is rare on a first pass, and it is checked
+PASS   review_findings                           3 findings
+PASS   review_findings[1]                        US-03 was merged into US-02 because overlap prevention is bu…
+PASS   review_findings[2]                        US-04 was rewritten so that confirmation covers both success…
+PASS   review_findings[3]                        UC-02 originally included UC-01, but that relationship was r…
+PASS   honesty.can_explain_everything_submitted  yes
+PASS   honesty.ai_usage_disclosed                yes
+------------------------------------------------------------------------
+21 PASS · 0 FAIL · 0 ERROR · 2 note
+Shape is fine. This says nothing about whether the work is good.
 ```
 
 | | PASS | FAIL | ERROR |
