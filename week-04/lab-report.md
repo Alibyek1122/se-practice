@@ -127,30 +127,27 @@ AI's first replies are saved as files in `models/original/` — do not paste the
 
 ## 7. Consistency table
 
-One row for each of **R1–R4**, then one row for **every use case in your revised use-case
-diagram**, spelled exactly as in the diagram, with the story ID it traces to.
-
 | Requirement / story | Use case | Classes | Behaviour element |
 | --- | --- | --- | --- |
-| R1 | <use case> | <classes and attributes> | <message, guard or decision> |
-| R2 | <use case> | <classes, note> | <message, guard or decision> |
-| R3 | <use case> | <classes and attributes> | <message, guard or decision> |
-| R4 | <use case> | <classes> | <message or action> |
-| <US-01> | <Book room> | <Student, Booking, Room> | <message or action> |
-
----
+| R1 | Book Room | Booking.startTime, Booking.endTime; R1 note | Valid time range? (R1) |
+| R2 | Book Room | Booking.status, Booking.overlaps(), Room–Booking association; R2 note | Overlap with active booking? (R2) |
+| R3 | Book Room; Block / Unblock Room | Room.blocked; R3 note | Room blocked? (R3) |
+| R4 | Book Room; Receive Confirmation | Booking; R4 note | Show confirmation to Student |
+| US-01 | View Room Availability | Student, Room, Booking | Not modeled in the selected Book Room activity diagram |
+| US-02 | Book Room | Student, Room, Booking | Submit booking request → R1 → R3 → R2 → Create booking |
+| US-03 | Cancel Own Booking | Student, Booking; ownership constraint | Not modeled in the selected Book Room activity diagram |
+| US-04 | Receive Confirmation | Booking; confirmation note | Show confirmation to Student |
+| US-05 | Block / Unblock Room | Administrator, Room | Room blocked? (R3) |
+| US-06 | Review Room Usage | Administrator, Booking | Not modeled in the selected Book Room activity diagram |
 
 ## 8. Change log
 
-At least **three** rows, and at least one for each required diagram (use case, class, your
-behaviour diagram). "Before" is what the AI produced; "After" is what you submitted.
-
 | # | Diagram | Before (AI's original) | After (your revision) | Reason |
 | --- | --- | --- | --- | --- |
-| 1 | <use case> | <before> | <after> | <rule, story or notation reason> |
-| 2 | <class> | <before> | <after> | <reason> |
-| 3 | <sequence / activity> | <before> | <after> | <reason> |
-
+| 1 | Use case | Student was directly associated with Receive Confirmation, and confirmation used unconditional `<<include>>`. | Removed the direct Student association and modeled confirmation conditionally with `<<extend>>`. | US-04 and R4 say confirmation occurs only after a successful booking or cancellation. |
+| 2 | Class | Booking contained `generateConfirmation()` and Administrator had dependency arrows to Room and Booking. | Removed `generateConfirmation()` and the unnecessary dependency arrows; added an ownership constraint for cancellation. | Confirmation is an outcome, not a Booking responsibility; US-03 requires a Student to cancel only their own booking. |
+| 3 | Activity | R1 was split into separate start-time and duration decisions. | Combined R1 into `Valid time range? (R1)` and clearly labeled the R1, R3 and R2 decisions. | The activity review requires three rule decisions: R1, R3 and R2. |
+| 4 | Activity | The overlap decision did not explain touching bookings. | Added a note stating that touching bookings are allowed and are not an overlap. | This is an approved assumption that affects R2. |
 ---
 
 ## 9. Checker output
