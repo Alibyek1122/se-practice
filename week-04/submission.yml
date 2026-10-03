@@ -1,0 +1,43 @@
+schema: 1
+week: "04"
+
+student:
+  name: Alibyek Molshylykh
+  student_id: 24B030054
+  github: Alibyek1122
+
+assistant:
+  tool: ChatGPT
+  model: GPT-5.6 Sol
+
+counts:
+  behaviour_diagram: activity
+  stories_source: week-03
+  use_cases: 6
+  change_log_rows: 4
+
+checker:
+  pass: 35
+  fail: 0
+  error: 0
+  commit: 2487919
+  kept_fails: []
+
+assumptions:
+  overlap_touching_bookings: allowed
+  blocking_a_booked_room: keep-bookings
+
+traceability:
+  use_cases_not_traced: []
+  rules_not_shown: []
+
+review_findings:
+  - "Student to Receive Confirmation was a direct association; confirmation is a system outcome, so the direct Student association was removed."
+  - "Booking.generateConfirmation() assigned confirmation generation to the Booking domain class; it was removed because confirmation is an outcome required by R4."
+  - "The activity diagram split R1 into separate time decisions; it was revised to one R1 decision followed by separate R3 and R2 decisions."
+  - "The overlap decision did not state the touching-bookings assumption; a note was added to make the R2 interpretation explicit."
+
+honesty:
+  originals_unedited: yes
+  can_explain_everything_submitted: yes
+  ai_usage_disclosed: yes

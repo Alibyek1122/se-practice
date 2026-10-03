@@ -1,0 +1,49 @@
+@startuml
+title Smart Campus - Activity Diagram: Book Room
+
+start
+
+:Student selects room;
+:Student enters start time and duration;
+:Submit booking request;
+
+if (Start time is in the future?) then ([Yes])
+
+  if (Duration > 0 and <= 2 hours?) then ([Yes])
+
+    if (Room is blocked?) then ([Yes])
+      :Reject booking;
+      :Show blocked-room reason;
+      stop
+
+    else ([No])
+
+      :Check active bookings\nfor the same room;
+
+      if (Overlapping active booking exists?) then ([Yes])
+        :Reject booking;
+        :Show overlap reason;
+        stop
+
+      else ([No])
+        :Create booking;
+        :Produce booking confirmation;
+        :Show confirmation to Student;
+        stop
+      endif
+
+    endif
+
+  else ([No])
+    :Reject booking;
+    :Show invalid-duration reason;
+    stop
+  endif
+
+else ([No])
+  :Reject booking;
+  :Show invalid-start-time reason;
+  stop
+endif
+
+@enduml

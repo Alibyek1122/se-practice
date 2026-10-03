@@ -1,0 +1,119 @@
+@startuml
+title Smart Campus Study Room Booking - Domain Class Diagram
+
+skinparam classAttributeIconSize 0
+
+class Student {
+  - studentId: String
+  - name: String
+
+  + viewAvailability(startTime: DateTime, duration: Duration)
+  + bookRoom(room: Room, startTime: DateTime, duration: Duration): Booking
+  + cancelBooking(booking: Booking)
+}
+
+class Room {
+  - roomId: String
+  - name: String
+  - blocked: Boolean
+
+  + isAvailable(startTime: DateTime, duration: Duration): Boolean
+  + block()
+  + unblock()
+}
+
+class Booking {
+  - bookingId: String
+  - startTime: DateTime
+  - endTime: DateTime
+  - status: BookingStatus
+
+  + getDuration(): Duration
+  + overlaps(other: Booking): Boolean
+  + cancel()
+  + generateConfirmation()
+}
+
+class Administrator {
+  - administratorId: String
+  - name: String
+
+  + blockRoom(room: Room)
+  + unblockRoom(room: Room)
+  + reviewUsage(startDate: Date, endDate: Date)
+}
+
+enum BookingStatus {
+  ACTIVE
+  CANCELLED
+}
+
+' Persistent domain associations
+Student "1" -- "0..*" Booking : makes >
+Room "1" -- "0..*" Booking : reserved for >
+
+' Behavioural dependencies rather than persistent ownership
+Administrator ..> Room : manages status
+Administrator ..> Booking : reviews usage
+
+note right of Booking
+R1:
+startTime must be in the future.
+Duration must be > 0 and <= 2 hours.
+
+R2:
+ACTIVE bookings for the same Room
+must not overlap.
+
+Touching bookings are allowed:
+endTime = another startTime
+is not an overlap.
+end note
+
+note right of Room
+R3:
+A blocked Room cannot accept
+a new Booking.
+
+Blocking does not automatically
+cancel existing Bookings.
+end note
+
+note bottom of Booking
+R4 / US-04:
+A successful booking produces
+confirmation.
+
+A successful cancellation also
+produces confirmation.
+
+Confirmation is represented here
+as behaviour rather than as a
+separate persistent domain class.
+end note
+
+note bottom of Administrator
+Usage review is based on Booking
+information for a selected period.
+end note
+
+legend bottom
+Assumptions:
+1. Each Booking is made by exactly one Student.
+2. Each Booking reserves exactly one Room.
+3. A Student may have zero or many Bookings.
+4. A Room may have zero or many Bookings over time.
+5. Cancelled bookings remain represented using BookingStatus
+   but do not count as active bookings for overlap checking.
+6. Room.blocked represents the current blocked/unblocked state.
+7. Availability is derived from Room.blocked and existing
+   ACTIVE Bookings; it is not stored as a separate object.
+8. Confirmation is an outcome of successful booking or
+   cancellation and is not assumed to be a persistent entity.
+9. Usage is derived from Booking data over the selected period,
+   so no separate Usage or Report class is assumed.
+10. No inheritance or composition is introduced because the
+    approved requirements do not establish such relationships.
+endlegend
+
+@enduml
