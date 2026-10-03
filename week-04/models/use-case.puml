@@ -23,11 +23,11 @@ Student -- UC_Cancel
 Administrator -- UC_Block
 Administrator -- UC_Usage
 
-' why: R4 and US-04 - every successful booking produces confirmation
-UC_Book ..> UC_Confirm : <<include>>
+' why: R4 and US-04 - confirmation occurs only after a successful booking
+UC_Confirm ..> UC_Book : <<extend>>
 
-' why: US-04 - every successful cancellation produces confirmation
-UC_Cancel ..> UC_Confirm : <<include>>
+' why: US-04 - confirmation occurs only after a successful cancellation
+UC_Confirm ..> UC_Cancel : <<extend>>
 
 note bottom of UC_View
 Availability reflects existing

@@ -117,16 +117,13 @@ AI's first replies are saved as files in `models/original/` — do not paste the
 
 ## 6. AI critique
 
-Run the critique prompt once, on all your revised diagrams together. At least **three** rows. A
-critique is another claim to evaluate, not a verdict: reject what is wrong and say why.
-
 | # | Issue the AI raised | Element it cited | Verdict | Why |
 | --- | --- | --- | --- | --- |
-| 1 | <issue> | <element> | <accept / reject> | <your reason> |
-| 2 | <issue> | <element> | <accept / reject> | <your reason> |
-| 3 | <issue> | <element> | <accept / reject> | <your reason> |
+| 1 | Confirmation is modeled as unconditional with `<<include>>`. | Use case: Book Room / Cancel Own Booking → Receive Confirmation | accept | R4 and US-04 say confirmation is produced only after a successful booking or cancellation. I will model confirmation as conditional behaviour using `<<extend>>`. |
+| 2 | The “cancel only your own booking” rule is not explicit in the class diagram. | Booking.cancel() and Student — Booking association | accept | US-03 says a Student may cancel only a booking they made. I will add this constraint to the class diagram. |
+| 3 | The touching-bookings assumption is not explicit in the activity diagram. | Overlap with active booking? (R2) | accept | The approved assumptions say an end time equal to another booking's start time is not an overlap. I will add this as a note near the R2 decision. |
+| 4 | Failure-reason messages are not required by the requirements. | Show overlap reason / blocked-room reason / invalid time-range reason | reject | The activity task requires rejection after failure, and these actions only make the reason for each rejection branch explicit. They do not add a new domain feature. |
 
----
 
 ## 7. Consistency table
 

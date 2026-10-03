@@ -73,6 +73,10 @@ R4:
 A successful booking produces
 a confirmation.
 
+US-03:
+Only the Student who made
+the Booking may cancel it.
+
 US-04:
 A successful cancellation also
 produces a confirmation.

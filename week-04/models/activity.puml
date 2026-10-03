@@ -13,6 +13,13 @@ if (Valid time range? (R1)) then ([yes])
 
     :Check active bookings for the same room;
 
+    note right
+    R2 assumption:
+    Touching bookings are allowed.
+    endTime = another startTime
+    is not an overlap.
+    end note
+
     if (Overlap with active booking? (R2)) then ([no])
       :Create booking;
       :Show confirmation to Student;
