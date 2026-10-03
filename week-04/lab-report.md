@@ -77,43 +77,43 @@ AI's first replies are saved as files in `models/original/` — do not paste the
 
 ### 4.1 Relationships, read both ways
 
-One row per association in your **revised** class diagram.
-
 | Association | Read left → right | Read right → left | Multiplicities |
 | --- | --- | --- | --- |
-| <Student — Booking> | <one student makes 0..* bookings> | <each booking belongs to exactly 1 student> | <1 / 0..*> |
-| <Room — Booking> | <...> | <...> | <...> |
+| Student — Booking | One Student makes 0..* Bookings. | Each Booking belongs to exactly 1 Student. | 1 / 0..* |
+| Room — Booking | One Room may have 0..* Bookings over time. | Each Booking reserves exactly 1 Room. | 1 / 0..* |
 
 ### 4.2 Constraints the multiplicities cannot show
 
-- R2: <how your diagram states it — which note, on which class>
-- <any other rule that is not visible in multiplicities>
+- R2: The note on Booking states that ACTIVE bookings for the same Room cannot overlap.
+- R1: The Booking note states that the start must be in the future and the duration must be greater than 0 and at most 2 hours.
+- R3: The Room note states that a blocked Room cannot accept a new Booking.
 
 ### 4.3 Assumptions
 
-- A1: <an assumption you had to make — e.g. what happens to existing bookings when a room is blocked>
-- <A2 ...>
+- A1: Touching bookings are allowed, so one booking ending at 12:00 and another starting at 12:00 do not overlap.
+- A2: Blocking a room prevents new bookings but does not automatically cancel existing bookings.
+- A3: Cancelled bookings remain represented with status CANCELLED and do not count as active bookings for R2.
 
 ### 4.4 Findings
 
 | # | Element | Problem | Rule or story | Fix |
 | --- | --- | --- | --- | --- |
-| 1 | <element> | <problem> | <rule or story> | <fix> |
+| 1 | Booking.generateConfirmation() | The AI assigned confirmation generation directly to the Booking domain class, but the requirements only state that confirmation is an outcome of successful booking or cancellation. | R4, US-04 | Removed generateConfirmation() from Booking and kept confirmation as a constraint note. |
+| 2 | Administrator dependencies to Room and Booking | The AI added dependency arrows that were not required to express the persistent domain structure. | US-05, US-06 | Removed the dependency arrows and kept Administrator operations and notes to show the required behaviour. |
 
----
+## 5. Task 3 — activity review
 
-## 5. Task 3 — behaviour diagram review
+**Assumptions the AI listed:**
 
-**Option chosen and why:** <3A sequence / 3B activity — one sentence on why>
-
-**Design components added beyond the domain model:** <name each one, e.g. `BookingService` —
-what it does in one line; write "none" for an activity diagram>
+- The activity models only the Book room flow.
+- Rejection shows a reason to the Student.
+- Confirmation is shown only after successful booking creation.
+- Overlap checking is done only against active bookings for the same room.
 
 | # | Element | Problem | Rule or story | Fix |
 | --- | --- | --- | --- | --- |
-| 1 | <element> | <problem> | <rule or story> | <fix> |
-
----
+| 1 | Time validation | The AI split R1 into two separate decisions: future start time and valid duration. The checker guidance expects three decisions overall: R1, R3 and R2. | R1, activity review question | Replaced the two separate checks with one decision: `Valid time range? (R1)`. |
+| 2 | Decision labels | The AI used Yes/No guards, but the revised diagram should clearly show the rule names on the decision nodes. | R1, R2, R3 and activity review question | Labeled the three decisions as `Valid time range? (R1)`, `Room blocked? (R3)` and `Overlap with active booking? (R2)`. |
 
 ## 6. AI critique
 
