@@ -1,0 +1,102 @@
+@startuml
+title Smart Campus Study Room Booking - Use-Case Diagram
+
+left to right direction
+
+actor Student
+actor Administrator
+
+rectangle "Smart Campus Study Room Booking System" {
+
+    usecase "View Room\nAvailability" as UC_View
+    usecase "Book Room" as UC_Book
+    usecase "Cancel Own\nBooking" as UC_Cancel
+    usecase "Receive\nConfirmation" as UC_Confirm
+
+    usecase "Block / Unblock\nRoom" as UC_Block
+    usecase "Review Room\nUsage" as UC_Usage
+}
+
+' Student goals
+Student -- UC_View
+Student -- UC_Book
+Student -- UC_Cancel
+Student -- UC_Confirm
+
+' Administrator goals
+Administrator -- UC_Block
+Administrator -- UC_Usage
+
+' Confirmation is a required result of successful booking/cancellation
+UC_Book ..> UC_Confirm : <<include>>
+UC_Cancel ..> UC_Confirm : <<include>>
+
+note bottom of UC_View
+Assumption:
+Availability reflects existing
+bookings and blocked rooms.
+end note
+
+note bottom of UC_Book
+Assumptions / rules:
+- Start time is in the future.
+- Duration > 0 and <= 2 hours.
+- Same-room active bookings
+  cannot overlap.
+- Touching bookings are allowed.
+- A blocked room cannot accept
+  a new booking.
+- Exactly 2 hours is allowed.
+end note
+
+note bottom of UC_Cancel
+Assumption:
+The Student can cancel only
+a booking that they made.
+end note
+
+note bottom of UC_Confirm
+Assumption:
+Confirmation is provided only
+after a booking or cancellation
+completes successfully.
+end note
+
+note bottom of UC_Block
+Assumptions:
+- Blocking prevents new bookings.
+- Existing bookings are not
+  automatically cancelled.
+- Unblocking allows the room to
+  become available again.
+end note
+
+note bottom of UC_Usage
+Assumption:
+Usage is based on booking
+information over a selected period.
+end note
+
+legend bottom
+  Rules:
+  R1 - Future start; duration > 0 and <= 2 hours.
+  R2 - Active bookings for the same room cannot overlap.
+  R3 - A blocked room cannot accept a new booking.
+  R4 - A successful booking produces a confirmation.
+
+  Out of scope:
+  payments, room equipment, recurring bookings,
+  waiting lists, notifications other than confirmation,
+  and user registration.
+
+  <<include>> rationale:
+  Receive Confirmation is included by Book Room and
+  Cancel Own Booking because confirmation is a required
+  outcome when either action completes successfully.
+
+  No <<extend>> relationship is used because none of the
+  approved stories describes optional behaviour that
+  conditionally extends another use case.
+endlegend
+
+@enduml

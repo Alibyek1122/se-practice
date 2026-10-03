@@ -59,16 +59,18 @@ AI's first replies are saved as files in `models/original/` — do not paste the
 
 ## 3. Task 1 — use-case review
 
-**Assumptions the AI listed:** <one line each, or "the AI listed none" — that is a finding too>
-
-At least **two** findings. A finding names the element, the problem and the rule or story that
-proves it is a problem.
+**Assumptions the AI listed:** 
+- Availability reflects existing bookings and blocked rooms.
+- Booking must satisfy R1, R2 and R3; touching bookings are allowed and exactly two hours is allowed.
+- A Student may cancel only their own booking.
+- Confirmation is provided only after successful booking or cancellation.
+- Blocking prevents new bookings but does not cancel existing bookings.
+- Usage is based on booking information over a selected period.
 
 | # | Element | Problem | Rule or story | Fix |
 | --- | --- | --- | --- | --- |
-| 1 | <e.g. Student → Send confirmation> | <what is wrong> | <R4 / US-01 / scenario sentence> | <what you changed> |
-| 2 | <element> | <problem> | <rule or story> | <fix> |
-
+| 1 | Student → Receive Confirmation | Receive Confirmation is a system result after booking or cancellation, not an independent Student goal. | US-04 | Removed the direct Student association; confirmation remains included from Book Room and Cancel Own Booking. |
+| 2 | Book Room / Cancel Own Booking → Receive Confirmation | The AI used `<<include>>`, but the required `' why:` comment was not written directly above each relationship. | R4, US-04 and PlantUML convention | Added a `' why:` comment directly above both include relationships. |
 ---
 
 ## 4. Task 2 — class diagram review
