@@ -147,19 +147,19 @@
      edited afterwards. This is what you paste into Prompt A as "My initial assumptions". -->
 
 **Scope:** 
-The system allows students to [what they can view],
-select [what they want to register for],
-and receive [what result].
-The system checks [two registration conditions].
+The system allows students to course catalog and available places,
+select a specific course offering,
+and receive registration confirmation or rejection.
+The system checks available capacity and duplicate enrollment.
 
 
 **Initial assumptions:**
 
-1. I assume that students are [login status]
+1. I assume that students are already signed in 
    before requesting registration.
 
 2. I assume that available places are calculated
-   using [two pieces of enrollment data].
+   using offering capacity and current enrollment count.
 
 ## 11. Appendix B — AI exchanges
 
