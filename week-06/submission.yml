@@ -1,0 +1,50 @@
+# Week 06 declaration — based on the files IN THIS prepared package.
+# Do not commit this declaration without rerunning the checker on YOUR final local files.
+# Replace student.github and checker.commit with the actual values.
+# Honest missing evidence is listed under checker.known_fails and explained in lab-report.md §9.1.
+
+schema: 1
+week: "06"
+
+student:
+  name: "Molshylykh Alibyek"
+  student_id: "24B030054"
+  github: "Alibyek1122"
+
+assistant:
+  tool: "Bolt.new"
+  model: "not displayed"
+  fallback_reason: "none"
+
+bolt:
+  project_url: "not-shared"
+
+counts:
+  issues: 2
+  cleanup_prompts: 2
+  change_log_rows: 2
+  v1_matches: 3
+  final_matches: 7
+
+checker:
+  pass: 16
+  fail: 3
+  error: 8
+  commit: 973f32b
+  known_fails: [P1, P2, P3, O1, O2, E3, E4, T3, T9, L4, L8]
+
+assumptions:
+  end_of_day: "not-expressible"
+
+review_findings:
+  - "AC4: the perceived v1 overlap bug was a wrong-room setup; Borealis 220 correctly returned Unavailable for 10:30-11:30."
+  - "AC6: Bolt removed the redundant roomName text from the DecisionCard, keeping the availability result readable."
+  - "T4 and T5: the final interface accepted exactly 120 minutes and rejected 121 minutes."
+  - "T8: the repeated same-slot check returned Available both times, consistent with AC5."
+  - "T9: a 440 px view was observed, but final evidence at about 375 px has not yet been supplied."
+
+honesty:
+  v1_export_unedited: "no"
+  screenshots_unedited: "yes"
+  can_explain_component_without_ai: "no"
+  ai_usage_disclosed: "yes"
