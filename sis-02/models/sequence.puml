@@ -1,3 +1,62 @@
-' SIS #02 — your FINAL sequence diagram goes here, as PlantUML (@startuml … @enduml).
-' Start from the AI's original in models/original/sequence.puml, apply your accepted review
-' decisions, then render it to models/img/sequence.png (or .svg). README section 5.
+
+@startuml
+title Course registration - sequence (R1-R5)
+
+actor "Student" as Student
+boundary "CourseRegistrationUI" as UI
+control "RegistrationService" as Service
+entity "Course" as Course
+entity "CourseOffering" as Offering
+
+Student -> UI : browseCatalog(semester)
+UI -> Service : browseCatalog(semester)
+Service -> Offering : findOfferings(semester)
+Offering --> Service : offerings (identifiers, linked courses,\ncapacities, derived enrollment counts)
+
+loop for each offering in offerings
+  Service -> Course : getCodeAndTitle(offering.course)
+  Course --> Service : courseCode, courseTitle
+  Service --> UI : catalogResults(code, title, offering,\nsemester, availablePlaces)
+  UI --> Student : displayCatalog(code, title, offering,\nsemester, availablePlaces)
+end
+
+note over Student, Offering
+  A catalog view is read-only and reserves no place (R1).
+  availablePlaces = capacity - current enrollment count.
+  Each offering uses its associated course code and title.
+end note
+
+Student -> UI : selectOffering(offeringId)
+UI --> Student : displaySelectedOffering(offeringId)
+Student -> UI : requestRegistration(offeringId)
+UI -> Service : registerOffering(studentId, offeringId)
+
+note over Service, Offering
+  atomic: the final duplicate check, live capacity check,
+  and Enrollment creation execute as one indivisible operation.
+  Concurrent requests cannot claim the same last place (R2-R4).
+end note
+
+Service -> Offering : isStudentAlreadyEnrolled(studentId)
+Offering --> Service : duplicateStatus
+Service -> Offering : checkCurrentCapacity()
+Offering --> Service : enrollmentCount, capacity
+
+alt already enrolled
+  Service --> UI : rejection("already enrolled")
+  UI --> Student : showRejection("already enrolled")
+else course full
+  Service --> UI : rejection("course full")
+  UI --> Student : showRejection("course full")
+else not enrolled and places left
+  create entity "Enrollment" as Enrollment
+  Service -> Enrollment : createEnrollment(studentId, offeringId)\n(link Student and CourseOffering)
+
+  Service -> Offering : getDerivedAvailablePlaces()
+  Offering --> Service : availablePlaces\n(from linked Enrollments)
+
+  Service --> UI : registrationConfirmation(enrollmentId, availablePlaces)
+  UI --> Student : showConfirmation(enrollmentId)
+end
+
+@enduml
