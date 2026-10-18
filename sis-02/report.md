@@ -9,18 +9,17 @@
   - Comments like this one are ignored by the checker and the word counter. Delete them or leave them.
 -->
 
+
 ## 1. Scope and assumptions
 
-<!-- Your FINAL scope statement and assumptions, after reviewing Prompt A's output. Say here
-     what is out of scope (payments, prerequisites, timetable clashes, waiting lists,
-     cancellation) — section 2 must not mention them. Section 10 keeps your first version. -->
-
-**Scope:** (write here)
+**Scope:**
+The system allows signed-in students to browse course offerings for a semester, view available places, register for a specific offering, and receive a confirmation or rejection. The system checks capacity and duplicate enrollments. Payments, prerequisites, timetable clashes, waiting lists, and cancellation are out of scope.
 
 **Assumptions:**
 
-1. (write here)
-2. (write here)
+1. Students are already signed in before requesting registration.
+2. Available places are calculated using the offering capacity and current enrollment count.
+
 
 ## 2. User stories and acceptance criteria
 
@@ -32,24 +31,24 @@
 
 ### US-01 — Browse offerings
 
-**US-01:** (write here — As a student, I want …, so that …)
+**US-01:** As a student, I want to browse the course catalog for a selected semester so that I can see available course offerings and their remaining places.
 
-- **AC-01** (R?): (write here — Given …, When …, Then …)
-- **AC-02** (R?): (write here)
+- **AC-01** (R1): Given a semester contains course offerings with defined capacities and enrollment counts, When the student browses the catalog, Then the system displays the course code, title, offering, semester, and available places.
+- **AC-02** (R1, R2): Given an offering has available places, When the student views the catalog without registering, Then no Enrollment is created, no place is reserved, and the enrollment count remains unchanged.
 
 ### US-02 — Register for an offering
 
-**US-02:** (write here)
+**US-02:** As a student, I want to register for a specific course offering so that I can obtain a place when registration is permitted.
 
-- **AC-03** (R?): (write here)
-- **AC-04** (R?): (write here)
+- **AC-03** (R2, R3, R4): Given an offering has available places and the student is not already enrolled, When the student requests registration, Then the system atomically rechecks capacity and duplicate enrollment, creates exactly one Enrollment linking the student and offering, updates availability, and returns a confirmation.
+- **AC-04** (R2, R3, R4): Given an offering has capacity 2 and enrollment count 1, and the requesting student is not enrolled, When the student registers while the last place is available, Then the system atomically performs final checks, creates one Enrollment, increases the count to 2, updates available places to 0, and confirms registration.
 
 ### US-03 — Receive a clear rejection
 
-**US-03:** (write here)
+**US-03:** As a student, I want to receive a clear rejection reason when registration is not permitted so that I understand why my request was unsuccessful.
 
-- **AC-05** (R?): (write here)
-- **AC-06** (R?): (write here)
+- **AC-05** (R2, R5): Given the catalog previously showed an available place but the current offering is full and the student is not already enrolled, When the student requests registration, Then the system rejects the request with "course full", creates no Enrollment, and leaves the enrollment count unchanged.
+- **AC-06** (R3, R5): Given the student already has an Enrollment for the selected offering, When the student requests registration again, Then the system rejects the request with "already enrolled", creates no additional Enrollment, and leaves the enrollment count unchanged.
 
 ## 3. Sequence diagram
 
@@ -171,9 +170,9 @@ The system checks available capacity and duplicate enrollment.
 
 ### B1 — Requirements (Prompt A)
 
-- **Tool:** (write here)
-- **Model:** (write here)
-- **Date:** (write here)
+- **Tool:** ChatGpt
+- **Model:** GPT-6
+- **Date:** 2026-10-18
 - **Purpose:** draft 3 user stories and 6 acceptance criteria
 
 <!-- Model: the exact model with its version, as the tool shows it (e.g. "GPT-5 Thinking",
@@ -183,13 +182,133 @@ The system checks available capacity and duplicate enrollment.
 **Prompt:**
 
 ~~~~text
-(paste here)
+
+Act as a requirements analyst. Use only this course registration scenario and rules R1–R5: A student browses an electronic course catalog, chooses a course offering and requests registration. Each offering has a limited number of places.
+
+A Course describes a subject. A CourseOffering is one scheduled section in one semester. Registration always targets a specific offering.
+
+Assume that the student is signed in, the selected offering exists, and its capacity is a positive whole number.
+
+Exclude payments, prerequisites, timetable clashes, waiting lists and cancellation. Use fictional students and courses.
+
+R1. Catalog: Show the course code, title, offering and available places for one semester.
+R2. Capacity: Recheck current availability when registering. Enrollment must never exceed the offering's capacity.
+R3. Duplicates: A student may have at most one enrollment in the same offering. Reject a repeat request.
+R4. Success: Create exactly one Enrollment linking the student and offering, update availability and return a confirmation.
+R5. Rejection: Explain "course full" or "already enrolled". Create no enrollment and leave the enrollment count unchanged.
+
+A catalog view does not reserve a place. Model the final checks and enrollment creation as one atomic operation so competing requests cannot take the same last place. A note describing the atomic operation is sufficient; database implementation is outside this assignment.
+
+My initial assumptions are 1. I assume that students are already signed in before requesting registration. 2. I assume that available places are calculated using offering capacity and current enrollment count.
+Draft 3 user stories and 2 Given / When / Then acceptance criteria for each. Use IDs US-01 to US-03 and AC-01 to AC-06. Map each criterion to rule IDs.
+Cover normal and rejection behavior. List uncertainty separately. Do not add excluded features or invent university policies.
 ~~~~
 
 **Response:**
 
 ~~~~text
-(paste here)
+
+# Prompt A — Requirements Analysis
+
+## 1. User Stories
+
+### US-01 — View Course Catalog
+
+**User Story:**  
+As a student, I want to browse the course catalog for a selected semester so that I can see available course offerings and their remaining places.
+
+**AC-01 — Display Course Catalog**
+
+**Mapped Rules:** R1
+
+- **Given** a semester contains course offerings with defined capacities and current enrollment counts,
+- **When** the student browses the course catalog for that semester,
+- **Then** the system displays each course code, course title, offering, semester, and number of available places.
+
+**AC-02 — Browsing Does Not Reserve Places**
+
+**Mapped Rules:** R1, R2
+
+- **Given** a course offering has available places,
+- **When** the student views the offering in the catalog without requesting registration,
+- **Then** the system displays the current availability without creating an Enrollment, reserving a place, or changing the enrollment count.
+
+---
+
+### US-02 — Register for a Course Offering
+
+**User Story:**  
+As a student, I want to register for a specific course offering so that I can obtain a place in that offering when registration is permitted.
+
+**AC-03 — Successful Registration**
+
+**Mapped Rules:** R2, R3, R4
+
+- **Given** a course offering has available places and the student is not already enrolled in that offering,
+- **When** the student requests registration,
+- **Then** the system atomically rechecks capacity and duplicate enrollment, creates exactly one Enrollment linking the student and offering, updates the available places, and returns a confirmation.
+
+**AC-04 — Register for the Last Available Place**
+
+**Mapped Rules:** R2, R3, R4
+
+- **Given** a course offering has a capacity of 2, one existing enrollment, and the requesting student is not already enrolled,
+- **When** the student requests registration while the last place remains available,
+- **Then** the system performs the final checks and Enrollment creation atomically, creates exactly one Enrollment, increases the enrollment count to 2, updates the available places to 0, and returns a confirmation.
+
+The atomic operation must prevent competing registration requests from exceeding the offering's capacity.
+
+---
+
+### US-03 — Receive Registration Rejection
+
+**User Story:**  
+As a student, I want to receive a clear rejection reason when registration is not permitted so that I can understand why my request was unsuccessful.
+
+**AC-05 — Course Full Rejection**
+
+**Mapped Rules:** R2, R5
+
+- **Given** a student previously saw an available place in the catalog, but the offering's current enrollment count has reached its capacity and the student is not already enrolled,
+- **When** the student requests registration,
+- **Then** the system rechecks current availability, rejects the request with "course full", creates no Enrollment, and leaves the enrollment count unchanged.
+
+**AC-06 — Duplicate Enrollment Rejection**
+
+**Mapped Rules:** R3, R5
+
+- **Given** a student already has an Enrollment for a specific course offering,
+- **When** the same student requests registration for that offering again,
+- **Then** the system rejects the request with "already enrolled", creates no additional Enrollment, and leaves the enrollment count unchanged.
+
+---
+
+## 2. Requirements Traceability
+
+| Acceptance Criterion | Rule IDs | Expected behavior |
+|---|---|---|
+| AC-01 | R1 | Display catalog information and available places |
+| AC-02 | R1, R2 | Browsing does not reserve capacity |
+| AC-03 | R2, R3, R4 | Successful registration creates one Enrollment |
+| AC-04 | R2, R3, R4 | Last available place is allocated atomically |
+| AC-05 | R2, R5 | Full offering rejects registration without changes |
+| AC-06 | R3, R5 | Duplicate registration is rejected without changes |
+
+All five rules R1–R5 are covered by the six acceptance criteria.
+
+## 3. Uncertainties
+
+1. **Rejection priority:** If a student is already enrolled and the offering is also full, R3 and R5 do not explicitly state which rejection reason takes priority. The UML model can check duplicates first, consistent with the prescribed guarded sequence structure.
+
+2. **Atomic implementation:** The scenario requires final checks and enrollment creation to be atomic but does not specify the technical mechanism. A UML note can represent this requirement without introducing database implementation details.
+
+3. **Offering identification:** The scenario requires registration for a specific CourseOffering but does not define the format of its identifier. The class diagram may use a generic offering identifier as a modeling assumption.
+
+## 4. Scope Verification
+
+The proposed user stories and acceptance criteria cover catalog browsing, availability, successful registration, duplicate prevention, capacity enforcement, confirmation, and rejection.
+
+No payments, prerequisites, timetable clashes, waiting lists, or cancellation features have been introduced.
 ~~~~
 
 ### B2 — UML drafts (Prompt B)
@@ -202,7 +321,43 @@ The system checks available capacity and duplicate enrollment.
 **Prompt:**
 
 ~~~~text
-(paste here)
+Using my approved scenario, R1–R5, stories and criteria below, return separate PlantUML code blocks for a sequence diagram and a domain class diagram.
+Sequence: include catalog browsing and guarded success, full-course and duplicate outcomes. Model final checks and creation as one atomic operation.
+Class: show domain concepts, useful attributes and multiplicities. State the capacity and uniqueness constraints. Explain assumptions and any technical lifelines.
+
+Approved scenario:
+A signed-in student browses an electronic course catalog, selects a course offering in a semester, and requests registration. Each offering has a limited number of places. A Course describes a subject, and a CourseOffering is a scheduled section in one semester. Registration targets a specific offering. The selected offering exists and has positive capacity.
+
+R1. Catalog: Show the course code, title, offering and available places for one semester.
+R2. Capacity: Recheck current availability when registering. Enrollment must never exceed the offering's capacity.
+R3. Duplicates: A student may have at most one enrollment in the same offering. Reject a repeat request.
+R4. Success: Create exactly one Enrollment linking the student and offering, update availability and return a confirmation.
+R5. Rejection: Explain "course full" or "already enrolled". Create no enrollment and leave the enrollment count unchanged.
+
+Catalog browsing does not reserve a place. Final checks and enrollment creation must be atomic. Excluded features are payments, prerequisites, timetable clashes, waiting lists and cancellation.
+
+Approved user stories and acceptance criteria:
+
+US-01 — Browse offerings
+As a student, I want to browse the course catalog for a selected semester so that I can see available course offerings and their remaining places.
+
+AC-01 (R1): Given a semester contains course offerings with defined capacities and enrollment counts, When the student browses the catalog, Then the system displays the course code, title, offering, semester, and available places.
+
+AC-02 (R1, R2): Given an offering has available places, When the student views the catalog without registering, Then no Enrollment is created, no place is reserved, and the enrollment count remains unchanged.
+
+US-02 — Register for an offering
+As a student, I want to register for a specific course offering so that I can obtain a place when registration is permitted.
+
+AC-03 (R2, R3, R4): Given an offering has available places and the student is not already enrolled, When the student requests registration, Then the system atomically rechecks capacity and duplicate enrollment, creates exactly one Enrollment linking the student and offering, updates availability, and returns a confirmation.
+
+AC-04 (R2, R3, R4): Given an offering has capacity 2 and enrollment count 1, and the requesting student is not enrolled, When the student registers while the last place is available, Then the system atomically performs final checks, creates one Enrollment, increases the count to 2, updates available places to 0, and confirms registration.
+
+US-03 — Receive a clear rejection
+As a student, I want to receive a clear rejection reason when registration is not permitted so that I understand why my request was unsuccessful.
+
+AC-05 (R2, R5): Given the catalog previously showed an available place but the current offering is full and the student is not already enrolled, When the student requests registration, Then the system rejects the request with "course full", creates no Enrollment, and leaves the enrollment count unchanged.
+
+AC-06 (R3, R5): Given the student already has an Enrollment for the selected offering, When the student requests registration again, Then the system rejects the request with "already enrolled", creates no additional Enrollment, and leaves the enrollment count unchanged.
 ~~~~
 
 **Response:**
