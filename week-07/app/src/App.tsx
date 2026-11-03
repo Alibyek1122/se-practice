@@ -19,6 +19,7 @@ import {
   timeToMinutes,
 } from '@/bookingLogic';
 import { evaluateBooking } from '@/bookingLogic';
+import { canBook } from './booking';
 import { SAMPLE_BOOKINGS, SAMPLE_ROOMS } from '@/data';
 import type { Decision } from '@/types';
 
@@ -43,15 +44,45 @@ export default function App() {
   const startMin = timeToMinutes(startTime);
   const endMin = timeToMinutes(endTime);
 
-  const decision: Decision | null = useMemo(() => {
-    if (startMin === null || endMin === null) return null;
-    return evaluateBooking(
-      { start: startMin, end: endMin },
-      selectedRoom,
-      bookings,
-      nowMinutes
-    );
-  }, [startMin, endMin, selectedRoom, bookings, nowMinutes]);
+  
+const decision: Decision | null = useMemo(() => {
+  if (startMin === null || endMin === null) return null;
+
+  // Select bookings for the current room only
+  const existingBookings = bookings
+    .filter((b) => b.roomId === selectedRoom.id)
+    .map((b) => ({ start: b.start, end: b.end }));
+
+  // The new function makes the booking decision
+  const available = canBook({
+    start: startMin,
+    end: endMin,
+    now: nowMinutes,
+    blocked: selectedRoom.blocked,
+    bookings: existingBookings,
+  });
+
+  if (available) {
+    return { kind: 'available' };
+  }
+
+  // Keep the original validation messages
+  const originalDecision = evaluateBooking(
+    { start: startMin, end: endMin },
+    selectedRoom,
+    bookings,
+    nowMinutes
+  );
+
+  if (originalDecision.kind === 'unavailable') {
+    return originalDecision;
+  }
+
+  return {
+    kind: 'unavailable',
+    reasons: ['The selected time is unavailable.'],
+  };
+}, [startMin, endMin, selectedRoom, bookings, nowMinutes]);
 
   const roomBookings = bookings
     .filter((b) => b.roomId === selectedRoom.id)
