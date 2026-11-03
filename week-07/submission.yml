@@ -1,0 +1,66 @@
+# week-07/submission.yml — your declaration for this lab.
+#
+# Facts only. Every explanation goes in lab-report.md; nothing here repeats prose.
+# Fill every value. Check it before you push:
+#
+#     python tests/validate_submission.py
+#
+# The validator checks shape, never quality. A green run is the floor, not the grade.
+# If you cannot run Python, fill the file by hand against the comments — a malformed
+# file costs you nothing if the content is there.
+
+schema: 1
+week: "07"
+
+student:
+  name: "Aliyek Molshylykh"        # KBTU-дағы толық аты-жөніңді жаз
+  student_id: "24B030054" # KBTU студенттік ID нөмірің
+  github: "Alibyek1122"        # Сенің GitHub username
+
+assistant:
+  tool: "ChatGPT"               # Тесттерді генерациялаған AI
+  model: "not displayed"        # Нақты модель көрсетілмесе, осылай қалдыр
+
+project:
+  baseline: "week-06"          # Өзіміздің Week 06 Bolt жобасын қолдандық
+  bolt_url: "not-shared"       # Bolt жобасының share link-і жоқ
+  vitest: "4.1.12"             # RUN v4.1.12 нәтижесінен
+
+counts:
+  tests_first: 17              # Алғашқы AI-generated suite
+  tests_final: 25              # Жақсартылған соңғы suite
+  first_run_failed: 0          # Бірінші run: 17 passed, 0 failed
+  review_decisions: 2          # Section 5: екі review шешімі
+  mutants_detected: 3          # M1, M2, M3 анықталды
+
+checker:
+  pass: 33
+  fail: 0
+  error: 0
+  commit: "9137895"
+  known_fails: []
+
+assumptions:
+  # Invalid existing booking: 700-650
+  # Request: 660-720
+  # Код логикасы бойынша true, бірақ нақты іске қосып раста
+  invalid_existing_booking: returns-true
+
+review_findings:
+  # Бірінші suite пен жақсартылған suite арасындағы айырмашылықтар
+
+  - "AC5: The first suite repeated T01 using 660-720. I improved AC5 by testing multiple unsorted bookings and verifying unchanged data."
+
+  - "app/src/booking.test.ts: The copied import path was incorrect for the final file location. I changed it to import the real function from ./booking."
+
+  - "M1: T06 detected the incorrect rejection of exactly 120 minutes, which AC2 allows."
+
+  - "M2: T01, T08 and R07 detected the incorrect treatment of touching endpoints as overlapping."
+
+  - "M3: T13 detected the missing blocked-room rejection required by AC3."
+
+honesty:
+  first_suite_unedited: yes     # Алғашқы 17 тест өзгеріссіз сақталған
+  outputs_unedited: no         # §7-дегі нәтижелер қысқартылған; толық raw output қажет
+  mutants_restored: yes        # Қателер қайтарылды, 25 тест өтті
+  ai_usage_disclosed: no       # AI_USAGE.md толық толтырылған соң yes қыл

@@ -1,15 +1,15 @@
 import { describe, expect, test } from 'vitest';
-import { canBook } from '../../app/src/booking';
+import { canBook } from './booking';
 
-// Save as week-07/suites/first/booking.test.ts.
+// Save as week-07/suites/final/booking.test.ts.
 // Imports canBook from the supplied app/src/booking.ts module.
 // No production implementation is copied, mocked, or changed.
 // Run from week-07/app:
-// npx vitest run --root .. suites/first/booking.test.ts
+// npx vitest run --root .. suites/final/booking.test.ts
 // AC mapping:
-// AC1: T02, T03, T04, T05, X1, X2.
+// AC1: T02, T03, T04, T05, X1, X2, R01-R04.
 // AC2: T06, T07. AC3: T13.
-// AC4: T01, T08, T09, T10, T11, T12, T14.
+// AC4: T01, T08, T09, T10, T11, T12, T14, R05-R08.
 // AC5: dedicated AC5 test plus exact decisions and unchanged data in all tests.
 // AC5's visible Available/Unavailable text requires a page-level check.
 // AC6: requires browser/manual checks for desktop/mobile usability and feedback;
@@ -225,8 +225,12 @@ describe('canBook — reviewed booking cases', () => {
     expect(request).toStrictEqual(before);
   });
 
-  test('AC5: available decision leaves bookings unchanged', () => {
-    const request = freshRequest(660, 720);
+  test('AC5: available decision preserves multiple unsorted bookings', () => {
+    const request = freshRequest(720, 780);
+    request.bookings = [
+      { start: 900, end: 960 },
+      { start: 600, end: 660 },
+    ];
     const before = {
       ...request,
       bookings: request.bookings.map((booking) => ({ ...booking })),
@@ -263,6 +267,128 @@ describe('canBook — reviewed booking cases', () => {
     const decision = canBook(request);
 
     expect(decision).toBe(true);
+    expect(request.bookings).toStrictEqual(before.bookings);
+    expect(request).toStrictEqual(before);
+  });
+
+  test('R01 AC1: negative start is unavailable', () => {
+    const request = freshRequest(-1, 30);
+    const before = {
+      ...request,
+      bookings: request.bookings.map((booking) => ({ ...booking })),
+    };
+
+    const decision = canBook(request);
+
+    expect(decision).toBe(false);
+    expect(request.bookings).toStrictEqual(before.bookings);
+    expect(request).toStrictEqual(before);
+  });
+
+  test('R02 AC1: starting before now is unavailable', () => {
+    const request = freshRequest(539, 569);
+    const before = {
+      ...request,
+      bookings: request.bookings.map((booking) => ({ ...booking })),
+    };
+
+    const decision = canBook(request);
+
+    expect(decision).toBe(false);
+    expect(request.bookings).toStrictEqual(before.bookings);
+    expect(request).toStrictEqual(before);
+  });
+
+  test('R03 AC1: later supplied now is respected', () => {
+    const request = freshRequest(780, 840);
+    request.now = 800;
+    const before = {
+      ...request,
+      bookings: request.bookings.map((booking) => ({ ...booking })),
+    };
+
+    const decision = canBook(request);
+
+    expect(decision).toBe(false);
+    expect(request.bookings).toStrictEqual(before.bookings);
+    expect(request).toStrictEqual(before);
+  });
+
+  test('R04 AC1: earlier supplied now permits an earlier future request', () => {
+    const request = freshRequest(500, 530);
+    request.now = 480;
+    const before = {
+      ...request,
+      bookings: request.bookings.map((booking) => ({ ...booking })),
+    };
+
+    const decision = canBook(request);
+
+    expect(decision).toBe(true);
+    expect(request.bookings).toStrictEqual(before.bookings);
+    expect(request).toStrictEqual(before);
+  });
+
+  test('R05 AC4: overlap from the left is unavailable', () => {
+    const request = freshRequest(590, 610);
+    const before = {
+      ...request,
+      bookings: request.bookings.map((booking) => ({ ...booking })),
+    };
+
+    const decision = canBook(request);
+
+    expect(decision).toBe(false);
+    expect(request.bookings).toStrictEqual(before.bookings);
+    expect(request).toStrictEqual(before);
+  });
+
+  test('R06 AC4: overlap with a later array entry is unavailable', () => {
+    const request = freshRequest(810, 840);
+    request.bookings = [
+      { start: 600, end: 660 },
+      { start: 800, end: 860 },
+    ];
+    const before = {
+      ...request,
+      bookings: request.bookings.map((booking) => ({ ...booking })),
+    };
+
+    const decision = canBook(request);
+
+    expect(decision).toBe(false);
+    expect(request.bookings).toStrictEqual(before.bookings);
+    expect(request).toStrictEqual(before);
+  });
+
+  test('R07 AC4: exact gap between unsorted bookings is available', () => {
+    const request = freshRequest(660, 720);
+    request.bookings = [
+      { start: 720, end: 780 },
+      { start: 600, end: 660 },
+    ];
+    const before = {
+      ...request,
+      bookings: request.bookings.map((booking) => ({ ...booking })),
+    };
+
+    const decision = canBook(request);
+
+    expect(decision).toBe(true);
+    expect(request.bookings).toStrictEqual(before.bookings);
+    expect(request).toStrictEqual(before);
+  });
+
+  test('R08 AC4: one minute of overlap is unavailable', () => {
+    const request = freshRequest(659, 660);
+    const before = {
+      ...request,
+      bookings: request.bookings.map((booking) => ({ ...booking })),
+    };
+
+    const decision = canBook(request);
+
+    expect(decision).toBe(false);
     expect(request.bookings).toStrictEqual(before.bookings);
     expect(request).toStrictEqual(before);
   });
