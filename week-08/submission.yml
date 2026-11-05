@@ -1,0 +1,59 @@
+# week-08/submission.yml — your declaration for this lab.
+#
+# Facts only. Every explanation goes in lab-report.md; nothing here repeats prose.
+# Fill every value. Check it before you push:
+#
+#     python tests/validate_submission.py
+#
+# The validator checks shape, never quality. A green run is the floor, not the grade.
+# If you cannot run Python, fill the file by hand against the comments — a malformed
+# file costs you nothing if the content is there.
+schema: 1
+week: "08"
+
+student:
+  name: "Molshylykh Alibyek"
+  student_id: "25B030054"
+  github: "Alibyek1122"
+
+assistant:
+  tool: "ChatGPT"
+  model: "GPT-6 Astra Medium"
+
+skill:
+  environment: "prompt-only"
+  invoked: "not-shown"
+
+project:
+  language: "ts"
+  vitest: "4.1.12"
+
+counts:
+  tests_final: 27
+  buggy_failed: 9
+  defects_logged: 2
+  lines_changed: 2
+
+checker:
+  pass: 31
+  fail: 0
+  error: 0
+  commit: "e55eaba"
+  known_fails: []
+
+verdict:
+  skill_helped: "yes"
+
+review_findings:
+  - "BUG-A: inclusive comparisons rejected touching endpoints; strict comparisons fixed the availability decision."
+  - "BUG-B: bookings.push mutated the caller's array; the non-touching BUG-B test exposed this independently."
+  - "T01: after fixing BUG-A, the Boolean assertion passed but the unchanged-bookings assertion still failed until BUG-B was fixed."
+  - "Skill step 7: the five-column response improved structure, but both answers identified the same two defects."
+  - "booking.test.ts: both answers proposed it.each, which conflicts with the lab's S2 requirement; those proposed tests were not adopted."
+  - "AC6: the 27 passing function tests do not verify desktop or mobile UI feedback."
+
+honesty:
+  buggy_function_pasted_unchanged: "yes"
+  same_input_both_chats: "yes"
+  outputs_unedited: "no"
+  ai_usage_disclosed: "yes"

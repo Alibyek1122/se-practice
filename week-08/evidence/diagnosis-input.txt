@@ -1,0 +1,56 @@
+Find the root cause of the failed room-booking test. Propose minimal patch and regression test. Do not edit code.
+
+Acceptance criteria:
+AC1 Reject start ≥ end and requests in the past.
+AC2 Enforce the maximum allowed duration (120 minutes).
+AC3 Reject a blocked room.
+AC4 Reject overlaps; allow bookings that only touch at endpoints.
+AC5 Return Available / Unavailable without changing booking data.
+AC6 Preserve clear UI feedback on desktop and mobile.
+
+Failing test input:
+{
+  start: 660,
+  end: 720,
+  now: 540,
+  blocked: false,
+  bookings: [{ start: 600, end: 660 }]
+}
+
+Observed failure:
+FAIL src/booking.test.ts > canBook — reviewed booking cases > T01 AC4: touching after is available
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+❯ src/booking.test.ts:39:22
+37| const decision = canBook(request);
+38|
+39| expect(decision).toBe(true);
+  |                  ^
+40| expect(request.bookings).toStrictEqual(before.bookings);
+41| expect(request).toStrictEqual(before);
+
+Provided code:
+export function canBook({ start, end, now, blocked, bookings }: {
+  start: number;
+  end: number;
+  now: number;
+  blocked: boolean;
+  bookings: { start: number; end: number }[];
+}): boolean {
+  if (!(0 <= start && start < end && end <= 1440)) return false;
+  if (!(start > now)) return false;
+  if (end - start > 120) return false;
+  if (blocked) return false;
+  for (const b of bookings) {
+    if (start <= b.end && end >= b.start) return false;
+  }
+  // keep the room's list current with the slot that was just found free
+  bookings.push({ start, end });
+  return true;
+}
