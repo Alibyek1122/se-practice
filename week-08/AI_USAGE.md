@@ -6,9 +6,9 @@ including anything an AI tool produced.
 
 | Tool | Exact model / plan | Used for | Which files it touched |
 | --- | --- | --- | --- |
-| | | diagnosis without the skill (Task 4) | none — "Do not edit code" |
-| | | diagnosis with bug-detector (Task 5) | none — "Do not edit code" |
-| | | | |
+| ChatGPT | GPT-6 Astra Medium / Plus | Diagnosis without the skill (Task 4) | No direct edits; response copied into lab-report.md §5 |
+| ChatGPT | GPT-6 Astra Medium / Plus | Diagnosis with bug-detector in a prompt-only simulation (Task 5) | No direct edits; response copied into lab-report.md §6 |
+| ChatGPT | Model as displayed in the guidance chat / Plus | Step-by-step guidance, regression test generation, patch instructions, report drafts, comparison table, and examples for §9.2 and §10 | Suggestions manually applied to app/src/booking.test.ts, app/src/booking.ts, lab-report.md and disclosure files |
 
 **`skills/bug-detector/SKILL.md` was typed by me from the deck's text, not generated:** yes / no
 
