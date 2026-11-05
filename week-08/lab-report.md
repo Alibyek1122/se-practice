@@ -14,8 +14,8 @@ grader find your answers by them. You can add rows to any table, but never remov
 | | |
 | --- | --- |
 | Assistant I debugged with (tool) | 	ChatGPT |
-| Exact model (with its version, or `not displayed`) | not displayed |
-| Where the skill was installed (ChatGPT / Claude web / Claude Code / prompt-only simulation) | |
+| Exact model (with its version, or `not displayed`) | GPT-6 Astra Medium |
+| Where the skill was installed (ChatGPT / Claude web / Claude Code / prompt-only simulation) | prompt-only simulation |
 | Where I ran the tests (Bolt terminal / my computer / Codespace) | 	My computer — macOS, Terminal |
 | Vitest version (the `RUN  v…` line of a run) | 4.1.12 |
 | Language of my booking module (`ts` or `js`) — the file I copied from `buggy/` | ts |
@@ -339,13 +339,125 @@ the same input you will use in section 6 (AC1–AC6, the failing test output, th
 `canBook`):
 
 ```text
-(paste here)
+Find the root cause of the failed room-booking test. Propose minimal patch and regression test. Do not edit code.
+
+Acceptance criteria:
+AC1 Reject start ≥ end and requests in the past.
+AC2 Enforce the maximum allowed duration (120 minutes).
+AC3 Reject a blocked room.
+AC4 Reject overlaps; allow bookings that only touch at endpoints.
+AC5 Return Available / Unavailable without changing booking data.
+AC6 Preserve clear UI feedback on desktop and mobile.
+
+Failing test input:
+{
+  start: 660,
+  end: 720,
+  now: 540,
+  blocked: false,
+  bookings: [{ start: 600, end: 660 }]
+}
+
+Observed failure:
+FAIL src/booking.test.ts > canBook — reviewed booking cases > T01 AC4: touching after is available
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+❯ src/booking.test.ts:39:22
+37| const decision = canBook(request);
+38|
+39| expect(decision).toBe(true);
+  |                  ^
+40| expect(request.bookings).toStrictEqual(before.bookings);
+41| expect(request).toStrictEqual(before);
+
+Provided code:
+export function canBook({ start, end, now, blocked, bookings }: {
+  start: number;
+  end: number;
+  now: number;
+  blocked: boolean;
+  bookings: { start: number; end: number }[];
+}): boolean {
+  if (!(0 <= start && start < end && end <= 1440)) return false;
+  if (!(start > now)) return false;
+  if (end - start > 120) return false;
+  if (blocked) return false;
+  for (const b of bookings) {
+    if (start <= b.end && end >= b.start) return false;
+  }
+  // keep the room's list current with the slot that was just found free
+  bookings.push({ start, end });
+  return true;
+}
 ```
 
 **The assistant's answer, pasted unedited:**
 
 ```text
-(paste here)
+Two defects are confirmed in the provided code.
+Defect	Evidence and root cause	Minimal fix
+AC4: endpoint contact rejected	660 <= 660 && 720 >= 600 evaluates to true, so the overlap check rejects the request. Inclusive comparisons treat touching endpoints as an overlap.	Use strict comparisons: start < b.end && end > b.start.
+AC5: booking data mutated	For accepted requests, bookings.push(...) changes the caller’s array. The current failure returns before reaching it; fixing AC4 alone would expose this second defect in the unchanged-data assertions.	Remove the push and its comment.
+
+
+Proposed minimal patch — not applied:
+   for (const b of bookings) {
+-    if (start <= b.end && end >= b.start) return false;
++    if (start < b.end && end > b.start) return false;
+   }
+-  // keep the room's list current with the slot that was just found free
+-  bookings.push({ start, end });
+   return true;
+
+Proposed regression tests:
+import { describe, expect, it } from "vitest";
+import { canBook } from "./booking";
+
+describe("canBook — overlap boundaries and unchanged data", () => {
+  it.each([
+    ["touching after", 660, 720, true],
+    ["touching before", 540, 600, true],
+    ["one-minute overlap at end", 659, 720, false],
+    ["one-minute overlap at start", 540, 601, false],
+    ["identical interval", 600, 660, false],
+  ])("%s", (_label, start, end, expected) => {
+    const request = {
+      start,
+      end,
+      now: 480,
+      blocked: false,
+      bookings: [{ start: 600, end: 660 }],
+    };
+    const before = structuredClone(request);
+
+    expect(canBook(request)).toBe(expected);
+    expect(request).toStrictEqual(before);
+  });
+
+  it("accepts the original failing request without modifying it", () => {
+    const request = {
+      start: 660,
+      end: 720,
+      now: 540,
+      blocked: false,
+      bookings: [{ start: 600, end: 660 }],
+    };
+    const before = structuredClone(request);
+
+    expect(canBook(request)).toBe(true);
+    expect(request).toStrictEqual(before);
+  });
+});
+
+An additional AC1 ambiguity remains: start > now rejects a booking starting exactly now, although “in the past” ordinarily means start < now. This does not cause T01’s failure; clarify that boundary before changing it.
+
+AC6 and the UI’s Available / Unavailable text cannot be verified from this function alone. No code was edited and these tests were not run.
 ```
 
 ---
@@ -356,16 +468,117 @@ the same input you will use in section 6 (AC1–AC6, the failing test output, th
 Only the question changes, to the deck's skill question:
 
 ```text
-(paste here)
+Use the bug-detector skill to diagnose the failed room-booking test.
+
+Acceptance criteria:
+AC1 Reject start ≥ end and requests in the past.
+AC2 Enforce the maximum allowed duration (120 minutes).
+AC3 Reject a blocked room.
+AC4 Reject overlaps; allow bookings that only touch at endpoints.
+AC5 Return Available / Unavailable without changing booking data.
+AC6 Preserve clear UI feedback on desktop and mobile.
+
+Failing test input:
+{
+  start: 660,
+  end: 720,
+  now: 540,
+  blocked: false,
+  bookings: [{ start: 600, end: 660 }]
+}
+
+Observed failure:
+FAIL src/booking.test.ts > canBook — reviewed booking cases > T01 AC4: touching after is available
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+❯ src/booking.test.ts:39:22
+37| const decision = canBook(request);
+38|
+39| expect(decision).toBe(true);
+  |                  ^
+40| expect(request.bookings).toStrictEqual(before.bookings);
+41| expect(request).toStrictEqual(before);
+
+Provided code:
+export function canBook({ start, end, now, blocked, bookings }: {
+  start: number;
+  end: number;
+  now: number;
+  blocked: boolean;
+  bookings: { start: number; end: number }[];
+}): boolean {
+  if (!(0 <= start && start < end && end <= 1440)) return false;
+  if (!(start > now)) return false;
+  if (end - start > 120) return false;
+  if (blocked) return false;
+  for (const b of bookings) {
+    if (start <= b.end && end >= b.start) return false;
+  }
+  // keep the room's list current with the slot that was just found free
+  bookings.push({ start, end });
+  return true;
+}
 ```
 
 **The assistant's answer, pasted unedited:**
 
 ```text
-(paste here)
+Two defects are confirmed by deterministic reproduction. No code was edited.
+Defect	Evidence	Root cause	Fix	Test
+AC4: touching endpoints rejected	The supplied request returns false: 660 <= 660 && 720 >= 600 is true.	Line 13 uses inclusive comparisons, treating endpoint contact as overlap.	Use start < b.end && end > b.start.	Request [660,720] against [600,660] must return true.
+AC5: booking data mutated	Changing only start to 661 returns true, but appends a booking.	Line 16 calls bookings.push(...) on the caller’s array.	Remove the push and its comment.	An accepted request must leave the entire input unchanged.
+
+
+The original test stops at line 39, so its mutation assertions are never reached. Fixing AC4 alone would expose the AC5 defect.
+
+Proposed minimal patch — not applied:
+   for (const b of bookings) {
+-    if (start <= b.end && end >= b.start) return false;
++    if (start < b.end && end > b.start) return false;
+   }
+-  // keep the room's list current with the slot that was just found free
+-  bookings.push({ start, end });
+   return true;
+
+Proposed regression tests using the real canBook export:
+import { expect, it } from "vitest";
+import { canBook } from "./booking";
+
+it.each([
+  ["touching after", 660, 720, true],
+  ["touching before", 540, 600, true],
+  ["separated", 661, 720, true],
+  ["overlapping by one minute", 659, 720, false],
+] as const)("%s: correct decision and unchanged input",
+  (_name, start, end, expected) => {
+    const request = {
+      start,
+      end,
+      now: 500,
+      blocked: false,
+      bookings: [{ start: 600, end: 660 }],
+    };
+    const before = structuredClone(request);
+
+    expect(canBook(request)).toBe(expected);
+    expect(request).toStrictEqual(before);
+  }
+);
+
+Expected after both fixes: all four cases pass; the original T01 also passes.
+
+Unconfirmed boundary issue: start > now rejects start === now. AC1 only explicitly rejects requests in the past; clarify whether starting exactly now is allowed before changing this condition.
+
+AC6: cannot be assessed from this function and unit-test failure; UI code or browser checks are needed.
 ```
 
-Did the environment show that the skill was invoked? yes / no / not shown
+Did the environment show that the skill was invoked? not shown — prompt-only simulation, not an installed skill.
 
 ---
 
@@ -376,15 +589,16 @@ tests showed. Write a short verdict in each cell, and give a reason where they d
 
 | Criterion | No skill | With skill |
 | --- | --- | --- |
-| Correct root cause | | |
-| Reproducible test | | |
-| Minimal proposed patch | | |
-| Unsupported claims | | |
-| Clarity of explanation | | |
+| Correct root cause | Correctly identified inclusive overlap comparisons (BUG-A) and mutation through bookings.push (BUG-B). | Correctly identified both causes and gave a separate non-touching input to expose BUG-B. |
+| Reproducible test | Provided fixed inputs and unchanged-data assertions, but used it.each, which conflicts with the lab's S2 requirement. | Included a non-touching case that isolates BUG-B, but also used it.each, which conflicts with S2. |
+| Minimal proposed patch | Correct overlap change. For BUG-B, removing both the push and its comment exceeds the required one-line change. | Proposed the same correct changes, with the same extra comment deletion for BUG-B. |
+| Unsupported claims | Explicitly stated that tests were not run. Flagged the start-at-now boundary as ambiguous rather than changing it. | Claimed deterministic reproduction without providing execution output. The reasoning is supported by the code, but execution is not evidenced. |
+| Clarity of explanation | Clearly explained why T01 stops before checking mutation and why AC6 needs UI verification. | Used the requested five-column format and a concrete non-touching example. The structure was clearer, but it found no additional defects. |
 
 **Which bugs did each answer find?** (BUG-A, BUG-B, both, neither)
 
--
+- No skill: both — BUG-A and BUG-B.
+- With skill: both — BUG-A and BUG-B.
 
 ---
 
