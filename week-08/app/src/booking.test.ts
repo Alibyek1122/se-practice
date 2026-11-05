@@ -393,4 +393,24 @@ describe('canBook — reviewed booking cases', () => {
     expect(request).toStrictEqual(before);
   });
 
+    test('BUG-A AC4: a one-minute gap touching both bookings is available', () => {
+    const request = freshRequest(660, 661);
+    request.bookings = [
+      { start: 600, end: 660 },
+      { start: 661, end: 720 },
+    ];
+
+    expect(canBook(request)).toBe(true);
+  });
+
+  test('BUG-B AC5: a non-touching available request preserves bookings', () => {
+    const request = freshRequest(720, 780);
+    const before = request.bookings.map((booking) => ({ ...booking }));
+
+    const decision = canBook(request);
+
+    expect(decision).toBe(true);
+    expect(request.bookings).toStrictEqual(before);
+  });
+
 });

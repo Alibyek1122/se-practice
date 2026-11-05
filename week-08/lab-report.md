@@ -1,8 +1,8 @@
 # Week 08 — Lab report
 
-**Name:**
-**Group:**
-**Date:**
+**Name:** Molshylykh Alibyek
+**Group:** өз тобыңды жаз
+**Date:** 2026-11-05
 
 Fill in every section. **Do not delete, rename or renumber the headings.** The checker and the
 grader find your answers by them. You can add rows to any table, but never remove its header.
@@ -13,12 +13,12 @@ grader find your answers by them. You can add rows to any table, but never remov
 
 | | |
 | --- | --- |
-| Assistant I debugged with (tool) | |
-| Exact model (with its version, or `not displayed`) | |
+| Assistant I debugged with (tool) | 	ChatGPT |
+| Exact model (with its version, or `not displayed`) | not displayed |
 | Where the skill was installed (ChatGPT / Claude web / Claude Code / prompt-only simulation) | |
-| Where I ran the tests (Bolt terminal / my computer / Codespace) | |
-| Vitest version (the `RUN  v…` line of a run) | |
-| Language of my booking module (`ts` or `js`) — the file I copied from `buggy/` | |
+| Where I ran the tests (Bolt terminal / my computer / Codespace) | 	My computer — macOS, Terminal |
+| Vitest version (the `RUN  v…` line of a run) | 4.1.12 |
+| Language of my booking module (`ts` or `js`) — the file I copied from `buggy/` | ts |
 
 ---
 
@@ -26,34 +26,274 @@ grader find your answers by them. You can add rows to any table, but never remov
 
 ### 2.1 My Week 07 suite on my own code
 
-The **real** output of your Week 07 suite, run in `week-08/app/` **before** you replace
-anything. It should be green. If it is not, say why under the block.
+I ran my existing Week 07 suite in `week-08/app/` before replacing
+`canBook`. All 25 tests passed.
+
+Actual terminal output:
 
 ```text
-(paste here)
+ RUN  v4.1.12 /Users/molshylykhalibyek/se-practice/week-08/app
+
+ ✓ src/booking.test.ts (25 tests) 5ms
+   ✓ canBook — reviewed booking cases (25)
+     ✓ T01 AC4: touching after is available 1ms
+     ✓ T02 AC1: starting now is unavailable 0ms
+     ✓ T03 AC1: zero duration is unavailable 0ms
+     ✓ T04 AC1: reversed interval is unavailable 0ms
+     ✓ T05 AC1: ending after day end is unavailable 0ms
+     ✓ T06 AC2: exactly 120 minutes is available 0ms
+     ✓ T07 AC2: 121 minutes is unavailable 0ms
+     ✓ T08 AC4: touching before is available 0ms
+     ✓ T09 AC4: partial overlap is unavailable 0ms
+     ✓ T10 AC4: containing an existing booking is unavailable 0ms
+     ✓ T11 AC4: inside an existing booking is unavailable 0ms
+     ✓ T12 AC4: identical interval is unavailable 0ms
+     ✓ T13 AC3: blocked request is unavailable 0ms
+     ✓ T14 AC4: empty bookings allow an otherwise valid request 0ms
+     ✓ AC5: available decision preserves multiple unsorted bookings 0ms
+     ✓ X1 AC1: ending exactly at 1440 is available 0ms
+     ✓ X2 AC1: one minute starting after now is available 0ms
+     ✓ R01 AC1: negative start is unavailable 0ms
+     ✓ R02 AC1: starting before now is unavailable 0ms
+     ✓ R03 AC1: later supplied now is respected 0ms
+     ✓ R04 AC1: earlier supplied now permits an earlier future request 0ms
+     ✓ R05 AC4: overlap from the left is unavailable 0ms
+     ✓ R06 AC4: overlap with a later array entry is unavailable 0ms
+     ✓ R07 AC4: exact gap between unsorted bookings is available 0ms
+     ✓ R08 AC4: one minute of overlap is unavailable 0ms
+
+ Test Files  1 passed (1)
+      Tests  25 passed (25)
+   Start at  22:50:04
+   Duration  188ms (transform 19ms, setup 0ms, import 82ms, tests 5ms, environment 0ms)
 ```
 
 ### 2.2 The same suite on the provided canBook
 
-You copied the whole `canBook` function from `buggy/booking.ts` (or `.js`) over yours and changed
-nothing else. This is the real output:
+I replaced the whole `canBook` function in `app/src/booking.ts`
+with the provided function from `buggy/booking.ts`, leaving the
+existing interfaces in place. I did not repair the provided function
+or change the tests before this run.
+
+Command: `npx vitest run`
+
+The same 25 tests produced 9 failures and 16 passes.
+
+Actual terminal output excerpts below. Repeated separators and some
+individual failure details are omitted; the complete test list and
+run summary are retained.
 
 ```text
-(paste here)
+ RUN  v4.1.12 /Users/molshylykhalibyek/se-practice/week-08/app
+
+ ❯ src/booking.test.ts (25 tests | 9 failed) 11ms
+   ❯ canBook — reviewed booking cases (25)
+     × T01 AC4: touching after is available 4ms
+     ✓ T02 AC1: starting now is unavailable 0ms
+     ✓ T03 AC1: zero duration is unavailable 0ms
+     ✓ T04 AC1: reversed interval is unavailable 0ms
+     ✓ T05 AC1: ending after day end is unavailable 0ms
+     × T06 AC2: exactly 120 minutes is available 1ms
+     ✓ T07 AC2: 121 minutes is unavailable 0ms
+     × T08 AC4: touching before is available 0ms
+     ✓ T09 AC4: partial overlap is unavailable 0ms
+     ✓ T10 AC4: containing an existing booking is unavailable 0ms
+     ✓ T11 AC4: inside an existing booking is unavailable 0ms
+     ✓ T12 AC4: identical interval is unavailable 0ms
+     ✓ T13 AC3: blocked request is unavailable 0ms
+     × T14 AC4: empty bookings allow an otherwise valid request 1ms
+     × AC5: available decision preserves multiple unsorted bookings 1ms
+     × X1 AC1: ending exactly at 1440 is available 0ms
+     × X2 AC1: one minute starting after now is available 1ms
+     ✓ R01 AC1: negative start is unavailable 0ms
+     ✓ R02 AC1: starting before now is unavailable 0ms
+     ✓ R03 AC1: later supplied now is respected 0ms
+     × R04 AC1: earlier supplied now permits an earlier future request 0ms
+     ✓ R05 AC4: overlap from the left is unavailable 0ms
+     ✓ R06 AC4: overlap with a later array entry is unavailable 0ms
+     × R07 AC4: exact gap between unsorted bookings is available 0ms
+     ✓ R08 AC4: one minute of overlap is unavailable 0ms
+```
+
+T01 failure:
+
+```text
+ FAIL  src/booking.test.ts > canBook — reviewed booking cases > T01 AC4: touching after is available
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/booking.test.ts:39:22
+     37|     const decision = canBook(request);
+     38|
+     39|     expect(decision).toBe(true);
+       |                      ^
+     40|     expect(request.bookings).toStrictEqual(before.bookings);
+     41|     expect(request).toStrictEqual(before);
+```
+
+AC5 failure:
+
+```text
+ FAIL  src/booking.test.ts > canBook — reviewed booking cases > AC5: available decision preserves multiple unsorted bookings
+AssertionError: expected [ { start: 900, end: 960 }, …(2) ] to strictly equal [ { start: 900, end: 960 }, …(1) ]
+
+- Expected
++ Received
+
+@@ -5,6 +5,10 @@
+    },
+    {
+      "end": 660,
+      "start": 600,
+    },
++   {
++     "end": 780,
++     "start": 720,
++   },
+  ]
+
+ ❯ src/booking.test.ts:242:30
+    240|
+    241|     expect(decision).toBe(true);
+    242|     expect(request.bookings).toStrictEqual(before.bookings);
+       |                              ^
+    243|     expect(request).toStrictEqual(before);
+    244|   });
+```
+
+Run summary:
+
+```text
+ Test Files  1 failed (1)
+      Tests  9 failed | 16 passed (25)
+   Start at  22:53:47
+   Duration  230ms (transform 22ms, setup 0ms, import 29ms, tests 11ms, environment 0ms)
 ```
 
 ### 2.3 One failing test per bug
 
-Add the two regression tests from README Part 1, step 5: one named `BUG-A` and one named `BUG-B`.
-Run them **on the buggy code**. Both must fail here. That is the evidence that each test can see
-its bug.
+I added two named regression tests without repairing `canBook`:
+
+- `BUG-A AC4: a one-minute gap touching both bookings is available`.
+  The request is 660–661, with existing bookings 600–660 and 661–720,
+  `now=540`, and `blocked=false`. It expects exactly `true`.
+- `BUG-B AC5: a non-touching available request preserves bookings`.
+  The request is 720–780, with an existing booking 600–660,
+  `now=540`, and `blocked=false`. It expects exactly `true`, then
+  compares the bookings with a copy made before the call.
+
+Command: `npx vitest run`
+
+Both new tests failed on the buggy implementation. The suite now
+contained 27 tests: 11 failed and 16 passed.
+
+Actual terminal output excerpts below. The earlier nine failure
+details and repeated separators are omitted; both new failure
+details and the run summary are retained.
 
 ```text
-(paste here)
+ RUN  v4.1.12 /Users/molshylykhalibyek/se-practice/week-08/app
+
+ ❯ src/booking.test.ts (27 tests | 11 failed) 11ms
+   ❯ canBook — reviewed booking cases (27)
+     × T01 AC4: touching after is available 4ms
+     ✓ T02 AC1: starting now is unavailable 0ms
+     ✓ T03 AC1: zero duration is unavailable 0ms
+     ✓ T04 AC1: reversed interval is unavailable 0ms
+     ✓ T05 AC1: ending after day end is unavailable 0ms
+     × T06 AC2: exactly 120 minutes is available 1ms
+     ✓ T07 AC2: 121 minutes is unavailable 0ms
+     × T08 AC4: touching before is available 0ms
+     ✓ T09 AC4: partial overlap is unavailable 0ms
+     ✓ T10 AC4: containing an existing booking is unavailable 0ms
+     ✓ T11 AC4: inside an existing booking is unavailable 0ms
+     ✓ T12 AC4: identical interval is unavailable 0ms
+     ✓ T13 AC3: blocked request is unavailable 0ms
+     × T14 AC4: empty bookings allow an otherwise valid request 1ms
+     × AC5: available decision preserves multiple unsorted bookings 1ms
+     × X1 AC1: ending exactly at 1440 is available 0ms
+     × X2 AC1: one minute starting after now is available 1ms
+     ✓ R01 AC1: negative start is unavailable 0ms
+     ✓ R02 AC1: starting before now is unavailable 0ms
+     ✓ R03 AC1: later supplied now is respected 0ms
+     × R04 AC1: earlier supplied now permits an earlier future request 0ms
+     ✓ R05 AC4: overlap from the left is unavailable 0ms
+     ✓ R06 AC4: overlap with a later array entry is unavailable 0ms
+     × R07 AC4: exact gap between unsorted bookings is available 0ms
+     ✓ R08 AC4: one minute of overlap is unavailable 0ms
+     × BUG-A AC4: a one-minute gap touching both bookings is available 0ms
+     × BUG-B AC5: a non-touching available request preserves bookings 0ms
 ```
 
----
+BUG-A failure:
 
+```text
+ FAIL  src/booking.test.ts > canBook — reviewed booking cases > BUG-A AC4: a one-minute gap touching both bookings is available
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/booking.test.ts:403:30
+    401|     ];
+    402|
+    403|     expect(canBook(request)).toBe(true);
+       |                              ^
+    404|   });
+    405|
+```
+
+BUG-B failure:
+
+```text
+ FAIL  src/booking.test.ts > canBook — reviewed booking cases > BUG-B AC5: a non-touching available request preserves bookings
+AssertionError: expected [ { start: 600, end: 660 }, …(1) ] to strictly equal [ { start: 600, end: 660 } ]
+
+- Expected
++ Received
+
+  [
+    {
+      "end": 660,
+      "start": 600,
+    },
++   {
++     "end": 780,
++     "start": 720,
++   },
+  ]
+
+ ❯ src/booking.test.ts:413:30
+    411|
+    412|     expect(decision).toBe(true);
+    413|     expect(request.bookings).toStrictEqual(before);
+       |                              ^
+    414|   });
+    415|
+```
+
+Run summary:
+
+```text
+ Test Files  1 failed (1)
+      Tests  11 failed | 16 passed (27)
+   Start at  23:04:57
+   Duration  232ms (transform 23ms, setup 0ms, import 31ms, tests 11ms, environment 0ms)
+```
+
+BUG-A failed at the Boolean decision assertion. BUG-B passed that
+assertion and failed at the bookings comparison, showing that its
+failure was caused by changed data rather than a rejected request.
+
+---
 ## 3. Defect log
 
 One row per defect. At least **BUG-A and BUG-B**. "Suspected cause" is your hypothesis
