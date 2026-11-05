@@ -11,32 +11,51 @@ interface CanBookInput {
   bookings: BookingInterval[];
 }
 
-export function canBook({
-  start,
-  end,
-  now,
-  blocked,
-  bookings,
-}: CanBookInput): boolean {
-
-  // AC1: Уақыт дұрыс болуы керек
-  if (start < 0 || end > 1440) return false;
-  if (start >= end) return false;
-  if (start <= now) return false;
-
-  // AC2: Ең көбі 120 минут
+export function canBook({ start, end, now, blocked, bookings }: {
+  start: number;
+  end: number;
+  now: number;
+  blocked: boolean;
+  bookings: { start: number; end: number }[];
+}): boolean {
+  if (!(0 <= start && start < end && end <= 1440)) return false;
+  if (!(start > now)) return false;
   if (end - start > 120) return false;
-
-  // AC3: Бөлме жабық болмауы керек
   if (blocked) return false;
-
-  // AC4: Басқа брондаумен қабыспауы керек
-  const hasOverlap = bookings.some(
-    (booking) =>
-      start < booking.end && booking.start < end
-  );
-
-  if (hasOverlap) return false;
-
+  for (const b of bookings) {
+    if (start <= b.end && end >= b.start) return false;
+  }
+  // keep the room's list current with the slot that was just found free
+  bookings.push({ start, end });
   return true;
 }
+
+// export function canBook({
+//   start,
+//   end,
+//   now,
+//   blocked,
+//   bookings,
+// }: CanBookInput): boolean {
+
+//   // AC1: Уақыт дұрыс болуы керек
+//   if (start < 0 || end > 1440) return false;
+//   if (start >= end) return false;
+//   if (start <= now) return false;
+
+//   // AC2: Ең көбі 120 минут
+//   if (end - start > 120) return false;
+
+//   // AC3: Бөлме жабық болмауы керек
+//   if (blocked) return false;
+
+//   // AC4: Басқа брондаумен қабыспауы керек
+//   const hasOverlap = bookings.some(
+//     (booking) =>
+//       start < booking.end && booking.start < end
+//   );
+
+//   if (hasOverlap) return false;
+
+//   return true;
+// }
