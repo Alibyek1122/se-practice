@@ -1,9 +1,27 @@
 {
-  "name": "",
-  "description": "",
+  "name": "check_room",
+  "description": "Smart Campus is a room booking availability checker that helps users check whether a room is available at a selected time. Time is measured in minutes from midnight, within the 0–1440 range. The tool checks room availability, existing bookings, time limits, and blocked rooms. It does not save a booking.",
   "inputSchema": {
     "type": "object",
-    "properties": {},
-    "required": []
+    "properties": {
+      "start": { "type": "integer", "minimum": 0, "maximum": 1440 },
+      "end": { "type": "integer", "minimum": 0, "maximum": 1440 },
+      "now": { "type": "integer", "minimum": 0, "maximum": 1440 },
+      "blocked": { "type": "boolean" },
+      "bookings": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "start": { "type": "integer", "minimum": 0, "maximum": 1440 },
+            "end": { "type": "integer", "minimum": 0, "maximum": 1440 }
+          },
+          "required": ["start", "end"],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": ["start", "end", "now", "blocked", "bookings"],
+    "additionalProperties": false
   }
 }
