@@ -3,9 +3,9 @@
 Fill in every section. Do not delete or renumber the headings: the README and the checker point at
 them. Replace every `<!-- comment -->` with your own text (comments are ignored by the checker).
 
-**Name:**
-**Student ID:**
-**GitHub:**
+**Name:** Alibyek Molshylykh
+**Student ID:** 24B030054
+**GitHub:** Alibyek1122
 
 ---
 
@@ -58,23 +58,31 @@ For each request, paste the model's reply exactly, then judge it against the req
 
 ### R1
 
-```text
+```
+{"name":"check_room","arguments":{"start":600,"end":660,"now":540,"blocked":false,"bookings":[{"start":660,"end":720}]}}
 
 ```
 
 <!-- Match? If F3 failed, which argument differs, and who was wrong: the model or the request? -->
 
+All five arguments match the request. The requested slot ends at 660, exactly when the existing booking starts. Touching endpoints are allowed, so the expected canBook result is Available.
+
+
 ### R2
 
-```text
+```
+{"name":"check_room","arguments":{"start":840,"end":990,"now":810,"blocked":true,"bookings":[]}}
 
 ```
 
 <!-- Same. R2 is a call that SHOULD be made, although canBook will say Unavailable. Did the model refuse to call? -->
 
+All five arguments match the request. The call is valid under the schema. The expected canBook result is Unavailable because the room is blocked and the requested duration is 150 minutes, exceeding the 120-minute limit.
+
 ### R3
 
-```text
+```
+The model asked for the exact time slot, the current time, the room's blocked status, and its existing bookings. It interpreted “a couple of hours” as two hours, but it did not invent start or end times or send a tool call.
 
 ```
 
