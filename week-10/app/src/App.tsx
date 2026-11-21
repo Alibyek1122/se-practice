@@ -3,7 +3,6 @@ import {
   Building2,
   CalendarCheck,
   CalendarClock,
-  CalendarX,
   CheckCircle2,
   Clock,
   DoorClosed,
@@ -15,7 +14,6 @@ import {
   formatInterval,
   MAX_BOOKING_MINUTES,
   MINUTES_PER_DAY,
-  minutesToTime,
   timeToMinutes,
 } from '@/bookingLogic';
 import { evaluateBooking } from '@/bookingLogic';
