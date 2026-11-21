@@ -1,0 +1,53 @@
+
+schema: 1
+week: "10"
+
+student:
+  name: Alibyek Molshylykh
+  student_id: 24B030054
+  github: Alibyek1122
+
+assistant:
+  tool: ChatGPT
+  model: GPT-5.6 Sol
+  environment: chat
+
+project:
+  starting_point: week-08
+  baseline_commit: 54ef78b
+  language: ts
+  vitest: 4.1.12
+
+counts:
+  claims_challenged: 7
+  risks_registered: 6
+  risks_confirmed: 5
+  tests_final: 28
+  agents_lines_changed: 7
+
+audit:
+  level: 1
+
+decision:
+  top_two: [R1, R5]
+  mitigated: [R1, R5]
+  release: go
+
+checker:
+  pass: 31
+  fail: 0
+  error: 0
+  commit: 68895d0
+  known_fails: []
+
+review_findings:
+  - "R1: canBook and evaluateBooking duplicated availability rules; the shared availabilityRules.ts module reduced the drift risk."
+  - "R5: AGENTS.md contained a missing test command and conflicting rules about real data, login/database, and external deployment."
+  - "AC4: the playbook said touching endpoints overlap, but the existing tests show that touching endpoints are allowed."
+  - "1a: no formatter is configured, so readiness remains Level 1."
+
+honesty:
+  review_was_read_only: yes
+  agents_patch_approved_by_me: yes
+  outputs_unedited: yes
+  ai_usage_disclosed: yes
