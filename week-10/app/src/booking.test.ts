@@ -1,5 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { canBook } from './booking';
+import { evaluateBooking } from './bookingLogic';
+import { SAMPLE_ROOMS } from './data';
 
 // Save as week-07/suites/final/booking.test.ts.
 // Imports canBook from the supplied app/src/booking.ts module.
@@ -411,6 +413,27 @@ describe('canBook — reviewed booking cases', () => {
 
     expect(decision).toBe(true);
     expect(request.bookings).toStrictEqual(before);
+  });
+
+
+  test('R1 duplicated validators disagree on malformed numeric input', () => {
+    const request = {
+      start: Number.NaN,
+      end: 600,
+      now: 540,
+      blocked: false,
+      bookings: [],
+    };
+
+    const simpleDecision = canBook(request);
+    const detailedDecision = evaluateBooking(
+      { start: request.start, end: request.end },
+      SAMPLE_ROOMS[0],
+      [],
+      request.now
+    );
+
+    expect(detailedDecision.kind === 'available').toBe(simpleDecision);
   });
 
 });
