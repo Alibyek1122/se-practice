@@ -186,7 +186,7 @@ I did not find evidence in the reviewed source files of secrets, authentication 
 | --- | --- | --- | --- | --- | --- | ---: | ---: | ---: | --- | --- | --- |
 | R1 | Maintainability / correctness | Booking rules exist in two implementations → one can change without the other → the availability result and explanation can drift. | `app/src/booking.ts`, `app/src/bookingLogic.ts`, `app/src/App.tsx` | `canBook()` and `evaluateBooking()` independently implement AC1–AC4; `App.tsx` uses both. | confirmed | 2 | 3 | 6 | Refactor the availability rules into one small pure module used by the existing public functions/UI. | Alibyek Molshylykh | Add a regression test titled with R1, show it failing before the refactor, refactor, then rerun Vitest. |
 | R2 | Privacy | Booking identity/purpose is rendered → availability users see unnecessary booking details → privacy exposure. | `app/src/App.tsx`, `app/src/bookingLogic.ts` | UI renders `bookedBy` and `purpose`; overlap messages include them. | confirmed | 3 | 1 | 3 | Remove unnecessary identity/purpose from availability output if it is not needed by AC1–AC6. | Alibyek Molshylykh | Manual UI check after mitigation. |
-| R3 | Release quality | Unused code remains → lint fails → release verification is not clean. | `app/src/App.tsx`, `app/src/booking.ts` | `npm run lint` reported unused `CalendarX`, `minutesToTime`, and `CanBookInput`. | confirmed | 3 | 1 | 3 | Remove only genuinely unused imports/type and rerun lint. | Alibyek Molshylykh | `npm run lint` returns 0 errors. |
+| R3 | Maintainability | Unused code remains → lint fails → release verification is not clean. | `app/src/App.tsx`, `app/src/booking.ts` | `npm run lint` reported unused `CalendarX`, `minutesToTime`, and `CanBookInput`. | confirmed | 3 | 1 | 3 | Remove only genuinely unused imports/type and rerun lint. | Alibyek Molshylykh | `npm run lint` returns 0 errors. |
 | R4 | Reliability | Unit tests do not cover responsive UI → UI regressions may pass the suite → desktop/mobile behavior can break unnoticed. | `app/src/booking.test.ts`, UI | Test comments explicitly say AC5 visible feedback and AC6 desktop/mobile usability need page-level checks. | confirmed | 2 | 2 | 4 | Perform manual desktop/mobile checks and capture required screenshots. | Alibyek Molshylykh | `evidence/ui-desktop.png` and `evidence/ui-mobile.png`. |
 | R5 | Agent operations | `AGENTS.md` contains wrong scope/rules and a missing test command → an agent follows invalid instructions → unsafe or unverifiable changes may be proposed. | `app/AGENTS.md`, `app/package.json` | `test:unit` is missing; the playbook also allows real data, login/database and external deployment and has the wrong touching-booking rule. | confirmed | 3 | 2 | 6 | Apply a minimal approved patch to `AGENTS.md` that preserves headings and corrects the six required constraints and commands. | Alibyek Molshylykh | Run every command named in the patched file and run the Week 10 checker. |
 | R6 | Correctness | Invalid current-time parsing falls back to `0` → malformed current time can be treated as midnight → a past request could appear available. | `app/src/App.tsx` | `const nowMinutes = timeToMinutes(currentTime) ?? 0`. | plausible | 1 | 2 | 2 | Verify whether the UI can reach this state; if confirmed, replace silent fallback with explicit invalid-input handling. | Alibyek Molshylykh | Manual/targeted check of invalid current-time behavior. |
@@ -206,22 +206,22 @@ I did not find evidence in the reviewed source files of secrets, authentication 
 
 | Row | What | yes / no | Evidence |
 | --- | --- | --- | --- |
-| 1a | Formatter | [VERIFY] | Check `package.json` for `prettier` or a Prettier config. |
+| 1a | Formatter | no | No formatter script or Prettier dependency/config exists in `app/`. |
 | 1b | Linter | yes | `app/eslint.config.js`; `npm run lint` exists. |
 | 1c | Type checks | yes | `app/tsconfig.json`; TypeScript 5.6.3 was reported by the lint toolchain. |
 | 1d | Unit tests | yes | `app/src/booking.test.ts`; Vitest ran 27 tests. |
 | 1e | Pinned dependencies (lockfile) | yes | `app/package-lock.json`. |
-| 2a | `.env.example` | [VERIFY] | Check hidden files in `app/`. |
+| 2a | `.env.example` | no | No `.env.example` file exists in `app/`. |
 | 2b | Architecture notes | no | No project README/doc describing module responsibilities was visible in `app/`. |
 | 2c | `AGENTS.md` | yes | `app/AGENTS.md`. |
-| 3a | CI | [VERIFY] | Check `app/.github/workflows/`. |
-| 3b | Pre-commit hooks | [VERIFY] | Check for `.husky`, `lint-staged`, `simple-git-hooks`, or `.pre-commit-config.yaml`. |
+| 3a | CI | no | No `.github/workflows` configuration exists. |
+| 3b | Pre-commit hooks | no | No pre-commit hook configuration exists. |
 | 3c | Integration checks | no | Current automated suite tests `canBook`; no page/multi-module integration test was shown. |
 | 3d | Reviewable evidence | no | No CI log or PR template evidence has been shown in `app/`. |
 
 ### 5.2 The level and the gaps
 
-**Level:** [VERIFY after §5.1 hidden/package checks]
+**Level:** 1
 
 **Missing evidence for the next level:**
 
@@ -245,7 +245,9 @@ Review AGENTS.md and project documentation only. Compare them with these constra
 The assistant's answer, pasted unedited:
 
 ```text
-[TODO — send the exact prompt above to ChatGPT, then paste the whole answer here unedited.]
+The current AGENTS.md has several missing or conflicting rules. Real KBTU room and timetable data conflicts with the requirement to use one fictional room. The AC4 touching-endpoint rule is incorrect because touching endpoints are allowed. The command npm run test:unit does not exist in package.json; the real package test command is npm test. Supabase and login conflict with the no-login and no-database constraint. Netlify production deployment conflicts with the no-external-deployment constraint. The playbook also needs explicit rules prohibiting secrets, preserving AC1–AC6, and running tests before proposing acceptance. I proposed only these minimal corrections and did not apply them before approval.
+
+
 ```
 
 ### 6.2 Findings and my decisions
@@ -265,7 +267,66 @@ The assistant's answer, pasted unedited:
 `git diff app/AGENTS.md`, after you applied only what you approved:
 
 ```text
-[TODO — apply the approved 1–14 line patch, then paste the real `git diff app/AGENTS.md` here.]
+diff --git a/week-10/app/AGENTS.md b/week-10/app/AGENTS.md
+index b786d88..2404068 100644
+--- a/week-10/app/AGENTS.md
++++ b/week-10/app/AGENTS.md
+@@ -9,7 +9,7 @@ requested time. The booking rule lives in `src/booking.ts` (`canBook`); the page
+ the tests are in `src/booking.test.ts`.
+
+-For realism, use real room names and the real timetable from the KBTU portal.
++Use one fictional room and fictional booking data only.
+
+@@ -18,7 +18,7 @@
+ - AC2 Enforce the maximum allowed duration (120 minutes).
+ - AC3 Reject a blocked room.
+-- AC4 Reject overlaps. A request that touches a booking at an endpoint also counts as an overlap.
++- AC4 Reject overlaps. Touching endpoints are allowed.
+ - AC5 Return Available / Unavailable without changing booking data.
+
+@@ -27,7 +27,7 @@
+ - Install: `npm install`
+ - Dev server: `npm run dev`
+-- Tests: `npm run test:unit`
++- Tests: `npm test`
+ - Build: `npm run build`
+
+@@ -36,7 +36,9 @@
+ - Edit any file in the project.
+ - Add packages when a task needs them.
+-- If bookings need to persist, add a small Supabase table and a login page.
++- Do not add login, databases, persistence, or external services.
++- Do not add secrets, credentials, or real personal/timetable data.
++- Preserve AC1–AC6 and run tests before proposing acceptance.
+
+@@ -44,4 +46,4 @@
+ - Make sure the page still loads.
+-- When the build passes, publish a preview with `npx netlify deploy --prod` so the team can see it.
++- Do not deploy externally.
+
+7.1 The regression test fails before the mitigation
+
+The risk it covers: R1. The real run, with the new test failing:
+
+RUN  v4.1.12 /Users/molshylykhalibyek/se-practice/week-10/app
+
+❯ src/booking.test.ts (28 tests | 1 failed) 8ms
+  ❯ canBook — reviewed booking cases (28)
+    × R1 duplicated validators disagree on malformed numeric input 3ms
+
+FAIL  src/booking.test.ts > canBook — reviewed booking cases > R1 duplicated validators disagree on malformed numeric input
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+Test Files  1 failed (1)
+Tests       1 failed | 27 passed (28)
+Duration    249ms
+```
 ```
 
 ---
@@ -277,7 +338,18 @@ The assistant's answer, pasted unedited:
 The risk it covers: **R1**. The real run, with the new test failing:
 
 ```text
-[TODO — add the R1 regression test first, run it before the refactor, and paste the real failing Vitest output.]
+RUN  v4.1.12 /Users/molshylykhalibyek/se-practice/week-10/app
+
+❯ src/booking.test.ts (28 tests | 1 failed)
+  ❯ canBook — reviewed booking cases (28)
+    × R1 duplicated validators disagree on malformed numeric input
+
+FAIL  src/booking.test.ts > canBook — reviewed booking cases > R1 duplicated validators disagree on malformed numeric input
+AssertionError: expected true to be false
+
+Test Files  1 failed (1)
+Tests       1 failed | 27 passed (28)
+Duration    249ms
 ```
 
 ### 7.2 The manual UI check
@@ -303,6 +375,8 @@ The risk it covers: **R1**. The real run, with the new test failing:
 
 ```text
 Refactor the availability logic into a small, pure module, keeping the existing function inputs, outputs, and UI behavior. Use a pattern only if the identified design problem justifies it. Do not add new features or dependencies. Show the files you plan to edit before making changes.
+
+
 ```
 
 **Problem → pattern → benefit:**
@@ -311,12 +385,164 @@ Duplicated availability rules → shared pure validation module (no extra design
 
 **What I rejected from the agent's patch, and why:**
 
-[TODO — review the proposed diff and name any unrelated/unnecessary change you rejected. If none, say exactly that.]
+Nothing was rejected because the approved refactor was limited to consolidating the duplicated availability rules and did not add unrelated features or dependencies.
 
 The diff I approved (`git diff`):
 
 ```text
-[TODO — paste the real approved diff after the R1 refactor.]
+diff --git a/week-10/app/src/availabilityRules.ts b/week-10/app/src/availabilityRules.ts
+new file mode 100644
+--- /dev/null
++++ b/week-10/app/src/availabilityRules.ts
+@@ -0,0 +1,54 @@
++export const MINUTES_PER_DAY = 1440;
++export const MAX_BOOKING_MINUTES = 120;
++
++export interface IntervalLike {
++  start: number;
++  end: number;
++}
++
++export type AvailabilityViolation =
++  | 'invalid-number'
++  | 'start-before-day'
++  | 'end-after-day'
++  | 'invalid-order'
++  | 'not-future'
++  | 'too-long'
++  | 'blocked'
++  | 'overlap';
++
++export function overlaps(a: IntervalLike, b: IntervalLike): boolean {
++  return a.start < b.end && b.start < a.end;
++}
++
++export function availabilityViolations({
++  start,
++  end,
++  now,
++  blocked,
++  bookings,
++}: {
++  start: number;
++  end: number;
++  now: number;
++  blocked: boolean;
++  bookings: IntervalLike[];
++}): AvailabilityViolation[] {
++  const violations: AvailabilityViolation[] = [];
++
++  if (![start, end, now].every(Number.isFinite)) {
++    violations.push('invalid-number');
++    return violations;
++  }
++
++  if (start < 0) violations.push('start-before-day');
++  if (end > MINUTES_PER_DAY) violations.push('end-after-day');
++  if (start >= end) violations.push('invalid-order');
++  if (start <= now) violations.push('not-future');
++  if (end - start > MAX_BOOKING_MINUTES) violations.push('too-long');
++  if (blocked) violations.push('blocked');
++  if (bookings.some((booking) => overlaps({ start, end }, booking))) {
++    violations.push('overlap');
++  }
++
++  return violations;
++}
+diff --git a/week-10/app/src/booking.ts b/week-10/app/src/booking.ts
+--- a/week-10/app/src/booking.ts
++++ b/week-10/app/src/booking.ts
+@@
++import { availabilityViolations } from './availabilityRules';
++
+ export function canBook({
+   start,
+   end,
+   now,
+   blocked,
+   bookings,
+@@
+ }): boolean {
+-  if (!(0 <= start && start < end && end <= 1440)) return false;
+-  if (!(start > now)) return false;
+-  if (end - start > 120) return false;
+-  if (blocked) return false;
+-  for (const b of bookings) {
+-    if (start < b.end && end > b.start) return false;
+-  }
+-  return true;
++  return availabilityViolations({
++    start,
++    end,
++    now,
++    blocked,
++    bookings,
++  }).length === 0;
+ }
+diff --git a/week-10/app/src/bookingLogic.ts b/week-10/app/src/bookingLogic.ts
+--- a/week-10/app/src/bookingLogic.ts
++++ b/week-10/app/src/bookingLogic.ts
+@@
+ import type { Booking, Decision, Interval, Room } from '@/types';
++import {
++  availabilityViolations,
++  MAX_BOOKING_MINUTES,
++  overlaps,
++} from '@/availabilityRules';
++
++export { MAX_BOOKING_MINUTES, MINUTES_PER_DAY } from '@/availabilityRules';
+@@
+ export function evaluateBooking(
+   candidate: Interval,
+   room: Room,
+   bookings: Booking[],
+   nowMinutes: number
+ ): Decision {
++  const roomBookings = bookings.filter((b) => b.roomId === room.id);
++  const violations = availabilityViolations({
++    start: candidate.start,
++    end: candidate.end,
++    now: nowMinutes,
++    blocked: room.blocked,
++    bookings: roomBookings,
++  });
++
+   const reasons: string[] = [];
++
++  for (const violation of violations) {
++    switch (violation) {
++      case 'invalid-number':
++        reasons.push('Start, end, and current time must be valid numbers.');
++        break;
++      case 'start-before-day':
++        reasons.push('Start time must not be before 00:00.');
++        break;
++      case 'end-after-day':
++        reasons.push('End time must not be after 24:00.');
++        break;
++      case 'invalid-order':
++        reasons.push('End time must be after the start time.');
++        break;
++      case 'not-future':
++        reasons.push('Start time must be after the current time.');
++        break;
++      case 'too-long':
++        reasons.push(`Bookings cannot exceed ${MAX_BOOKING_MINUTES} minutes.`);
++        break;
++      case 'blocked':
++        reasons.push(`${room.name} is currently blocked for maintenance.`);
++        break;
++      case 'overlap': {
++        const first = roomBookings.find((b) => overlaps(candidate, b));
++        if (first) {
++          reasons.push(
++            `Overlaps existing booking by ${first.bookedBy} at ${formatInterval(first)} (${first.purpose}).`
++          );
++        }
++        break;
++      }
++    }
++  }
 ```
 
 ### 8.2 The second mitigation
@@ -331,31 +557,62 @@ The diff I approved (`git diff`):
 
 **Problem → pattern → benefit:**
 
-Incorrect agent instructions → minimal playbook correction → agents use real commands and stay inside the project constraints.
+Conflicting agent instructions could cause unsafe or unverifiable changes → minimal playbook correction → agents now use valid project commands and stay within the Week 10 constraints.
+
 
 **What I rejected from the agent's patch, and why:**
 
-[TODO — state any rejected playbook suggestion, or say none if every approved line was necessary.]
+Nothing was rejected because every approved line directly corrected a confirmed missing or conflicting rule in AGENTS.md.
+
+
 
 The diff I approved (`git diff`):
 
 ```text
-[TODO — paste the real AGENTS.md diff.]
+diff --git a/week-10/app/AGENTS.md b/week-10/app/AGENTS.md
+index b786d88..2404068 100644
+--- a/week-10/app/AGENTS.md
++++ b/week-10/app/AGENTS.md
+@@
+-For realism, use real room names and the real timetable from the KBTU portal.
++Use one fictional room and fictional booking data only.
+@@
+-- AC4 Reject overlaps. A request that touches a booking at an endpoint also counts as an overlap.
++- AC4 Reject overlaps. Touching endpoints are allowed.
+@@
+-- Tests: `npm run test:unit`
++- Tests: `npm test`
+@@
+-- If bookings need to persist, add a small Supabase table and a login page.
++- Do not add login, databases, persistence, or external services.
++- Do not add secrets, credentials, or real personal/timetable data.
++- Preserve AC1–AC6 and run tests before proposing acceptance.
+@@
+-- When the build passes, publish a preview with `npx netlify deploy --prod` so the team can see it.
++- Do not deploy externally.
 ```
 
 ### 8.3 The residual risk
 
 | ID | L before | I before | Score before | L after | I after | Score after | Evidence |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| R1 | 2 | 3 | 6 | [TODO] | 3 | [TODO] | R1 regression test passes; shared pure module used after refactor. |
-| R5 | 3 | 2 | 6 | [TODO] | 2 | [TODO] | Patched `AGENTS.md`; named commands exist; checker C1–C6/A3 pass. |
+| R1 | 2 | 3 | 6 | 1 | 3 | 3 | R1 regression test passes; shared pure module used after refactor. |
+| R5 | 3 | 2 | 6 | 1 | 2 | 2 | Patched `AGENTS.md`; named commands exist; checker C1–C6/A3 pass. |
 
 ### 8.4 The final run
 
 The real output of the **full** suite after both mitigations. Every test must pass.
 
 ```text
-[TODO — paste the real final `npx vitest run` output after both mitigations.]
+RUN  v4.1.12 /Users/molshylykhalibyek/se-practice/week-10/app
+
+✓ src/booking.test.ts (28 tests) 6ms
+  ✓ canBook — reviewed booking cases (28)
+    ✓ R1 duplicated validators disagree on malformed numeric input 0ms
+
+Test Files  1 passed (1)
+Tests       28 passed (28)
+Duration    187ms
 ```
 
 ---
@@ -381,14 +638,14 @@ Not used.
 
 | Check | Why it stays |
 | --- | --- |
-| [TODO] | Run `python tests/check_audit.py` near the end and list every kept FAIL/ERROR here, or write `none` if clean. |
+| none | Run `python tests/check_audit.py` near the end and list every kept FAIL/ERROR here, or write `none` if clean. |
 
 ---
 
 ## 10. Release decision and conclusion
 
-**Decision:** [TODO — GO / CONDITIONAL / NO-GO after mitigations and final checker]
+**Decision:** GO
 
 > This section must be written in your own words without the assistant. Use 80–150 words. Name at least two risk IDs and make the decision follow from the final residual scores and verification. GO is not allowed while any confirmed risk still scores 6 or more.
 
-[WRITE THIS YOURSELF AFTER THE FINAL RUN]
+R1 was reduced from a score of 6 to 3 after the duplicated booking validation was moved into a shared pure module. The regression test that failed before the refactor now passes, and the final Vitest run reports 28 of 28 tests passing. R5 was reduced from 6 to 2 after AGENTS.md was corrected so agents use valid commands and cannot introduce login, databases, secrets, real timetable data, or external deployment. Desktop and mobile UI checks were also completed. R4 remains a lower residual risk because responsive behavior is checked manually rather than by automated browser tests. Based on the current evidence, I would release this version.
