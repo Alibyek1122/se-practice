@@ -170,3 +170,12 @@ describe('SIS 04 booking boundaries and integration', () => {
     expect(available).toBe(true);
   });
 });
+
+test('F4 no matching rooms returns an empty result', () => {
+  const result = filterRooms(rooms, {
+    attendees: 100,
+    equipment: ['projector'],
+  });
+
+  expect(result).toEqual([]);
+});
