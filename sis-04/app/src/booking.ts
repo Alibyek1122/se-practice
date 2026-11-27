@@ -1,3 +1,4 @@
+import type { Room } from './rooms';
 interface BookingInterval {
   start: number;
   end: number;
@@ -28,4 +29,22 @@ export function canBook({ start, end, now, blocked, bookings }: {
   
   
   return true;
+}
+
+export function checkRoom(
+  rooms: Room[],
+  roomId: string,
+  { start, end, now }: { start: number; end: number; now: number }
+): boolean {
+  const room = rooms.find((item) => item.id === roomId);
+
+  if (!room) return false;
+
+  return canBook({
+    start,
+    end,
+    now,
+    blocked: room.blocked,
+    bookings: room.bookings,
+  });
 }

@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { filterRooms } from './filter';
+import { canBook, checkRoom } from './booking';
 
 const rooms = [
   {
@@ -71,5 +72,101 @@ describe('SIS 04 room filtering', () => {
     });
 
     expect(result.map((room) => room.id)).not.toContain('r2');
+  });
+});
+
+describe('SIS 04 room availability', () => {
+  test('F3 blocked room is never reported available', () => {
+    const result = checkRoom(rooms, 'r3', {
+      start: 900,
+      end: 960,
+      now: 800,
+    });
+
+    expect(result).toBe(false);
+  });
+
+  test('F5 changing selected room uses THAT room bookings', () => {
+    const firstRoom = checkRoom(rooms, 'r1', {
+      start: 600,
+      end: 660,
+      now: 500,
+    });
+
+    const secondRoom = checkRoom(rooms, 'r2', {
+      start: 600,
+      end: 660,
+      now: 500,
+    });
+
+    expect(firstRoom).toBe(false);
+    expect(secondRoom).toBe(true);
+  });
+});
+
+describe('SIS 04 booking boundaries and integration', () => {
+  test('B1 exactly 120 minutes returns true', () => {
+    expect(
+      canBook({
+        start: 600,
+        end: 720,
+        now: 500,
+        blocked: false,
+        bookings: [],
+      })
+    ).toBe(true);
+  });
+
+  test('B2 121 minutes returns false', () => {
+    expect(
+      canBook({
+        start: 600,
+        end: 721,
+        now: 500,
+        blocked: false,
+        bookings: [],
+      })
+    ).toBe(false);
+  });
+
+  test('B3 touching an existing booking returns true', () => {
+    expect(
+      canBook({
+        start: 660,
+        end: 720,
+        now: 500,
+        blocked: false,
+        bookings: [{ start: 600, end: 660 }],
+      })
+    ).toBe(true);
+  });
+
+  test('B4 overlapping an existing booking returns false', () => {
+    expect(
+      canBook({
+        start: 650,
+        end: 700,
+        now: 500,
+        blocked: false,
+        bookings: [{ start: 600, end: 660 }],
+      })
+    ).toBe(false);
+  });
+
+  test('INT filterRooms then checkRoom uses a returned room', () => {
+    const matchedRooms = filterRooms(rooms, {
+      attendees: 20,
+      equipment: ['projector', 'whiteboard'],
+    });
+
+    expect(matchedRooms.map((room) => room.id)).toEqual(['r1', 'r4']);
+
+    const available = checkRoom(matchedRooms, 'r4', {
+      start: 600,
+      end: 660,
+      now: 500,
+    });
+
+    expect(available).toBe(true);
   });
 });
