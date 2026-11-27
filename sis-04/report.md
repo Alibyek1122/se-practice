@@ -14,13 +14,13 @@
 
 | Item | Value |
 | --- | --- |
-| Assistant (tool) | (write here) |
-| Assistant model | (write here) |
-| Starting point | (write here) |
-| Baseline commit | (write here) |
-| Language (ts or js) | (write here) |
-| Vitest version | (write here) |
-| Where I ran the tests | (write here) |
+| Assistant (tool) | ChatGPT |
+| Assistant model | GPT-5.6 Sol |
+| Starting point | week-08 |
+| Baseline commit | c42f483  |
+| Language (ts or js) | ts |
+| Vitest version | v4.1.12 |
+| Where I ran the tests | My computer (macOS terminal) |
 
 ### 1.1 Baseline run
 
@@ -29,7 +29,8 @@
      "No test files found". That is your honest "original" number, 0/0. -->
 
 ```text
-(paste here)
+Test Files  1 passed (1)
+Tests       27 passed (27)
 ```
 
 ## 2. Context for the assistant
@@ -40,7 +41,13 @@
      they do. A tree is fine:  src/App.tsx — the page, holds the rooms and the form … -->
 
 ```text
-(paste here)
+src/App.tsx — React UI; selects a room, prepares booking input and renders availability feedback.
+src/booking.ts — contains canBook(), the existing boolean AC1–AC5 booking rule.
+src/bookingLogic.ts — time helpers, overlap logic, formatting and evaluateBooking().
+src/data.ts — contains the current fictional rooms and bookings.
+src/types.ts — contains Room, Booking, Interval and Decision types.
+src/booking.test.ts — existing Vitest suite for the original booking rules.
+
 ```
 
 ### 2.2 The context message as sent
@@ -49,7 +56,40 @@
      (no login, payments, live APIs or database; fictional data only). Unedited. -->
 
 ```text
-(paste here)
+I am extending an existing Smart Campus Room Availability Checker for SIS #04.
+
+Repository map:
+- src/App.tsx — React UI.
+- src/booking.ts — existing canBook() booking rule.
+- src/bookingLogic.ts — validation messages and time/overlap helpers.
+- src/data.ts — fictional room and booking data.
+- src/types.ts — project types.
+- src/booking.test.ts — existing Vitest suite.
+
+Preserve AC1–AC6:
+AC1 Reject start >= end and requests in the past.
+AC2 Maximum duration is 120 minutes.
+AC3 Reject a blocked room.
+AC4 Reject overlaps; touching endpoints are allowed.
+AC5 Do not mutate booking data.
+AC6 Clear responsive feedback on desktop and mobile.
+
+New requirements:
+F1 capacity >= requested attendees.
+F2 room contains ALL selected equipment.
+F3 blocked room is never available.
+F4 clear empty state when no rooms match.
+F5 changing selected room refreshes the result and uses that room's own bookings.
+
+Constraints:
+- 4+ fictional rooms.
+- No login, payments, live APIs, database or real personal data.
+- Keep canBook compatible.
+- Required modules: rooms.ts, filter.ts, booking.ts, App.tsx/components.
+- Analyse first.
+- Identify at least three maintainability risks.
+- Give a numbered small-step plan.
+- Do not write code yet.
 ```
 
 ## 3. Codebase analysis (Task 1)
@@ -60,26 +100,34 @@
      e.g. src/App.tsx, check(). Evidence is what you saw, not what the assistant said.
      Priority: High / Medium / Low. -->
 
-| # | Risk | Where (file / function) | Evidence | Priority |
+| # | Risk | Where | Evidence | Priority |
 | --- | --- | --- | --- | --- |
-| 1 | (write here) | (write here) | (write here) | High / Medium / Low |
-| 2 | (write here) | (write here) | (write here) | High / Medium / Low |
-| 3 | (write here) | (write here) | (write here) | High / Medium / Low |
+| 1 | Booking validation is duplicated and may drift. | `src/booking.ts canBook()` and `src/bookingLogic.ts evaluateBooking()` | Both independently implement time, duration, blocked and overlap checks. | High |
+| 2 | Current Room model does not contain equipment and room-owned bookings. | `src/types.ts`, `src/data.ts` | SIS #04 requires every room to have equipment and its own bookings. | High |
+| 3 | UI contains application logic that should be outside presentation code. | `src/App.tsx` | App filters bookings, creates booking requests and calls multiple rule functions. | High |
+| 4 | Room and booking data are split into separate collections. | `src/data.ts` | `SAMPLE_ROOMS` and `SAMPLE_BOOKINGS` require repeated roomId filtering. | Medium |
 
 ### 3.2 Improvement plan — before editing
 
 <!-- Numbered, in the order you will do it, smallest safe step first. Written BEFORE you change
      code: the commit that adds this section comes before the commit that changes app/src. -->
 
-1. (write here)
-2. (write here)
-3. (write here)
+1. Add tests for F1 and F2 first.
+2. Create `src/rooms.ts` with 4+ complete fictional rooms.
+3. Create `src/filter.ts` and implement `filterRooms()`.
+4. Add tests for F3 and F5, then implement `checkRoom()` in `booking.ts`.
+5. Add B1–B6 and INT tests.
+6. Refactor duplicated booking validation while keeping AC1–AC6.
+7. Update `App.tsx` so it imports room/filter/booking logic instead of implementing rules.
+8. Add F4 empty state and responsive UI.
+9. Capture five required screenshots.
+10. Update before/after diagrams and run final quality checks.
 
 ### 3.3 One AI suggestion I rejected or modified
 
-| Suggestion (as the assistant made it) | Decision | Why — with the AC, F-rule, test or file behind it |
+| Suggestion | Decision | Why |
 | --- | --- | --- |
-| (write here) | Rejected / Modified | (write here) |
+| Hide every blocked room inside `filterRooms()`. | Modified | I keep `filterRooms()` focused on F1 capacity and F2 equipment. A blocked room may remain visible with a blocked label, but `checkRoom()` and `canBook()` must always return false for it under F3 and AC3. |
 
 ## 4. Feature extension (Task 2)
 
