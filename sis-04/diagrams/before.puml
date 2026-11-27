@@ -1,0 +1,17 @@
+@startuml
+title Smart Campus - Before Refactoring
+
+component "App.tsx\nUI + orchestration" as UI
+component "data.ts\nRooms + bookings" as Data
+component "types.ts\nTypes" as Types
+component "booking.ts\ncanBook()" as Booking
+component "bookingLogic.ts\nevaluateBooking()\nhelpers" as Logic
+
+UI --> Data
+UI --> Types
+UI --> Booking
+UI --> Logic
+
+Booking ..> Logic : duplicated rules
+
+@enduml
