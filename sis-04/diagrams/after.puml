@@ -1,5 +1,18 @@
-' diagrams/after.puml — the same view of your FINAL code. It must show rooms, booking, filter
-' and the UI (App and any components), with an arrow for each import. Replace this stub.
-'
 @startuml
+title Smart Campus - After Refactoring
+
+component "App.tsx\nUI" as UI
+component "rooms.ts\nRoom catalog" as Rooms
+component "filter.ts\nfilterRooms()" as Filter
+component "booking.ts\ncanBook() + checkRoom()" as Booking
+component "bookingLogic.ts\nTime/format helpers" as Helpers
+
+UI --> Rooms
+UI --> Filter
+UI --> Booking
+UI --> Helpers
+
+Filter --> Rooms
+Booking --> Rooms
+
 @enduml

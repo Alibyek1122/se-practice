@@ -1,12 +1,17 @@
-' diagrams/before.puml — the modules and components of your STARTING POINT and what depends on what.
-' Replace this stub. A component diagram is enough, for example:
-'
-'   @startuml
-'   component "App.tsx" as App
-'   component "booking.ts" as Booking
-'   App --> Booking : canBook()
-'   note right of App : rooms, times and the result all live here
-'   @enduml
-'
 @startuml
+title Smart Campus - Before Refactoring
+
+component "App.tsx\nUI + orchestration" as UI
+component "data.ts\nRooms + bookings" as Data
+component "types.ts\nTypes" as Types
+component "booking.ts\ncanBook()" as Booking
+component "bookingLogic.ts\nevaluateBooking()\nhelpers" as Logic
+
+UI --> Data
+UI --> Types
+UI --> Booking
+UI --> Logic
+
+Booking ..> Logic : duplicated rules
+
 @enduml
